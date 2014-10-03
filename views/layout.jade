@@ -46,11 +46,11 @@ html
 
             if !user
                 form.navbar-form.navbar-right(role="sign-in", method="GET", action="/api/sign_in")
-                    - var error_klass = (error && error == "sign-in") ? "has-error" : ""
-                    div(class="form-group #{error_klass}")
-                        input.form-control.left(type="text", maxlength="40", name="email", placeholder="Email", required)
-                    div(class="form-group #{error_klass}")
-                        input.form-control.right(type="password", maxlength="40", name="password", placeholder="Password", style='width:100px;' required)
+                    - var error_klass = (error && error == "sign-in") ? "error-input" : ""
+                    div.form-group
+                        input(class="#{error_klass} form-control left" type="text", maxlength="40", name="email", placeholder="Email", required)
+                    div.form-group
+                        input(class="#{error_klass} form-control right" type="password", maxlength="40", name="password", placeholder="Password", style='width:100px;' required)
                     button.flat-button.sign-in-button(type="submit") Sign In
             else
                 .navbar-right

@@ -27,7 +27,7 @@ block content
 								.col-md-3.col-sm-6
 									.team-pick-with-logo-container(name="#{team.short_name}",data-division="#{division}",data-sub_division="#{sub_division}")
 										p.bolder &mdash; #{team.long_name} &mdash;
-										img(src='/images/#{team.short_name}.png')
+										img(src='#{team.logo_path}')
 										.display-odds Win Division: #{team.division_odds_display} = 
 											b #{team.division_odds} pts
 										.display-odds Win Wildcard: #{team.wc_odds_display} = 

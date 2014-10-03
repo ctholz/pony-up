@@ -19,9 +19,9 @@ block content
 						tr
 							td #{pick.week}
 
-							each team_name, j in pick.formatted_picks
-								td(title="#{team_name}")
-									img.dashboard-team-thumbnail(src="/images/#{team_name}.png")
+							each team, j in pick.formatted_picks
+								td(title="#{team.name}")
+									img.dashboard-team-thumbnail(src="#{team.logo_path}")
 
 					- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] : WEEK_OF_SEASON;
 					- for (var j = start_week; j <= 17; j++) { 

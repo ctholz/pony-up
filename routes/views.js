@@ -144,6 +144,8 @@ exports.picker = function(req,res) {
 	if (req.user)
 		res.locals.user = req.user
 
+	console.log('foo - ',req.query)
+
 	if ('error' in req.query)
 		data['error'] = req.query.error
 

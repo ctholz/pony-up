@@ -17,6 +17,7 @@ var RedisStore = require('connect-redis')(session);
 
 global._ = require('underscore');
 global.helpers = require('./helpers');
+global.mailer = require('./mailer');
 
 /* Database */
 var db = require('./models');
@@ -30,7 +31,7 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 7654);
 
 
 app.use(favicon());
@@ -195,6 +196,7 @@ function fetchBasics(req, res, next) {
         res.locals.user = req.user
 
         req.user.getLeagues().success(function(leagues) {
+            console.log('FETCHING:: ',leagues)
             res.locals.my_leagues = leagues || [];
 
             db.Pick.find({where: {status: "active", week: CONSTANTS.WEEK_OF_SEASON, UserId: req.user.id}}).success(function(picks) {
@@ -211,7 +213,12 @@ function fetchBasics(req, res, next) {
 /* Middleware -- fetches all NFL teams */
 function fetchTeams(req, res, next) {
     db.Team.findAll({where:{status:'active'}}).success(function(teams) {
-        res.locals.teams = teams.map(function(team) { return team.values });
+        res.locals.teams = teams.map(function(team) {
+            // Augment obj with logo path
+            team = team.values;
+            team.logo_path = helpers.getLogoPathForTeamName(team.short_name);
+            return team;
+        });
         return next();
     });
 };
@@ -256,7 +263,8 @@ global.CONSTANTS = {
     WEEK_OF_SEASON:         5,
     WEEKS_IN_SEASON:        17,
     MASTER_PASSWORD:        "tinaseelig",
-    CRYPTO_KEY:             "innovation"
+    CRYPTO_KEY:             "innovation",
+    MANDRILL_API_KEY:       "ot_cp4jYJNhpl8R6NTBY3g"
 }
 
 

@@ -36,14 +36,14 @@ if (!global.hasOwnProperty('db')) {
   /* Associations */
   global.db.User.hasOne(global.db.Team, { as: "FavoriteTeam" });
   global.db.User.hasMany(global.db.Pick, { as: "Picks" });
-  global.db.User.hasMany(global.db.League, { as: "Leagues" });
+  global.db.User.hasMany(global.db.League, { as: "Leagues", through: "User_Leagues" });
 
   global.db.Pick.belongsTo(global.db.User);
   //global.db.Pick.belongsTo(global.db.League);
 
   //global.db.League.hasOne(global.db.User, { as: "Commissioner" });
   global.db.League.belongsTo(global.db.User, { as: "Commissioner" });
-  global.db.League.hasMany(global.db.User, { as: "Players" });
+  global.db.League.hasMany(global.db.User, { as: "Players", through: "User_Leagues" });
 
   global.db.Odd.belongsTo(global.db.Team);
 

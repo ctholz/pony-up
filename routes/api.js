@@ -221,7 +221,10 @@ function createAndJoinLeague(user, lid, callback) {
 
 		league.updateAttributes({UserId: user.id}).success(function() {
 			league.addPlayer(user).success(function() {
-				callback();
+
+				user.addLeague(league).success(function() {
+					callback();
+				});
 			});
 		});
 	});
@@ -233,7 +236,10 @@ function joinLeague(user, lid, callback) {
 		if (!league) callback("Missing league");
 
 		league.addPlayer(user).success(function() {
-			callback();
+
+			user.addLeague(league).success(function() {
+				callback();
+			});
 		});
 	});	
 };

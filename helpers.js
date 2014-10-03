@@ -89,7 +89,12 @@ exports.formatPicksForView = function(teams, picks) {
 
 		var formatted_set_of_picks = set_of_picks;
 		formatted_set_of_picks.formatted_picks = set_of_picks.picks.map(function(team_id) {
-			return teamNameForId(team_id)
+			var short_name = teamNameForId(team_id);
+			return {
+				id: 			team_id,
+				name: 			short_name,
+				logo_path: 		logoPathForTeamName(short_name)
+			}
 		});
 		return formatted_set_of_picks;
 	});
@@ -101,6 +106,18 @@ exports.formatPicksForView = function(teams, picks) {
 exports.formatOddsForView = function(teams,odds) {
 	return 'foo'
 };
+
+// Public API (Wrapper)
+exports.getLogoPathForTeamName = function(short_name) {
+	return logoPathForTeamName(short_name);
+};
+
+/* Input: short name
+	Output: logo path, formatted according to dev/prod env */
+function logoPathForTeamName(short_name) {
+	return "/images/" + ((global.dev) ? short_name.toLowerCase() : short_name) + ".png"
+};
+
 
 
 	// // Return an array, even if singleton
