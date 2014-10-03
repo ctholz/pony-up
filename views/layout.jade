@@ -1,0 +1,68 @@
+doctype html
+html
+  head
+    title Pony Up: NFL Playoff Predictor
+
+    //- Meta -//
+    meta(charset='utf-8')
+    meta(name='description', content='Pony Up: NFL Playoff Predictor')
+    meta(name="viewport",content="width=device-width, initial-scale=1")
+
+    //- Stylesheets -//
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(href="//netdna.bootstrapcdn.com/font-awesome/4.0.2/css/font-awesome.css", rel="stylesheet")
+    link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css')
+
+    //- Icons -//
+    link(rel="stylesheet", href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css")
+    link(rel="stylesheet", href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css")
+
+    //- Favicon
+    //link(rel="shortcut icon" href="/images/favicon.ico")
+
+    // Fonts
+    //link(rel="stylesheet", type="text/css", href="http://fonts.googleapis.com/css?family=Abril+Fatface|Oswald")
+
+    // JS
+    script(type="text/javascript", src="http://code.jquery.com/jquery-1.10.1.min.js")
+    script(type="text/javascript", src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js")
+    script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js")
+    script(type="text/javascript", src="/javascripts/utilities.js")
+
+  body
+
+    nav.navbar.navbar-colored(role="navigation")
+
+        .container-fluid
+            .navbar-header
+                button(type="button", class="navbar-toggle", data-toggle="collapse", data-target="#collapsable")
+                    span.icon-bar
+                    span.icon-bar
+                    span.icon-bar
+                a.navbar-brand.white(href='/lobby') Pony Up
+
+                .navbar-left
+                    div NFL Season: Week #{WEEK_OF_SEASON}
+
+            if !user
+                form.navbar-form.navbar-right(role="sign-in", method="GET", action="/api/sign_in")
+                    - var error_klass = (error && error == "sign-in") ? "has-error" : ""
+                    div(class="form-group #{error_klass}")
+                        input.form-control.left(type="text", maxlength="40", name="email", placeholder="Email", required)
+                    div(class="form-group #{error_klass}")
+                        input.form-control.right(type="password", maxlength="40", name="password", placeholder="Password", style='width:100px;' required)
+                    button.flat-button.sign-in-button(type="submit") Sign In
+            else
+                .navbar-right
+                    h4 #{user.fullName()}
+                        a.logout(href='/logout') Logout
+
+    .container
+        block content
+
+
+    script(type="text/javascript").
+
+        var WEEK_OF_SEASON = !{JSON.stringify(week_of_season)},
+            WEEKS_REMAINING = !{JSON.stringify(WEEKS_REMAINING)};
+

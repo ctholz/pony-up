@@ -1,0 +1,28 @@
+extends layout
+
+block content
+
+	.row
+		.col-md-8.col-md-offset-2
+			h1 Create Your Leage
+
+			if errors
+				.error=errors[0]['text']
+
+			form#new-league-form.form(role='form', method='post', action='/api/create_league')
+
+				.form-group
+					label(for="titleInput") Name
+					input#titleInput.form-control-override(type="text", name="title" placeholder="The Golden Years", required)
+
+				.form-group
+					label(for="passwordInput") Password 
+						em (optional&mdash;if this is left blank, your league will be open to the public)
+					input#passwordInput.form-control-override(type="password", name="password")
+
+				.form-group
+					label(for="forMoneyInput") Playing for Money?
+					input(type="checkbox", name="forMoney")
+
+				.form-group
+					button.flat-button(type="submit") Create

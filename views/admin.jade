@@ -1,0 +1,134 @@
+extends layout
+
+
+block content
+
+	.row
+		h1 Admin
+		.error-container.error
+		.success-container.green
+		.col-sm-4
+			button.flat-button(onclick="showOddsContainer()") Enter Odds 
+		.col-sm-4
+			button.flat-button(onclick="showWinnersContainer()") Enter Division Leaders
+		.col-sm-4
+			button.flat-button.red-button(onclick="debug()") Debug
+
+
+	.row.odds-container.hidden
+		.col-md-10.col-md-offset-1
+			h1 Enter Odds 
+
+			form#odds-form.form(role='form')
+
+				each t,i in teams
+
+					if i % 3 == 0
+						.row
+
+					.col-md-4
+						.form-group.odds-group(data-tid="#{t.id}")
+							label.bold #{t.short_name} [#{t.division}] &nbsp;&nbsp;&nbsp;
+							input.form-control-override.input-inline(name="divisionChampionOdds", type="text", maxlength="24", placeholder="Odds to win Division", required)
+							input.form-control-override.input-inline(name="playoffOdds", type="text", maxlength="24", placeholder="Odds to make playoffs", required)
+
+				button.flat-button(type="submit") Submit
+
+	.row.winners-container.hidden
+		.col-md-10.col-md-offset-1
+			h1 Enter Division Leaders
+
+			form#winners-form.form(role='form')
+
+				each d, i in pick_ordering
+					if i % 2 == 0
+						.row
+
+					.col-md-6
+						.form-group
+							label.bold #{d}
+							select.form-control-override.input-inline(data-is_wildcard="#{d.indexOf('WC') != -1}", required)
+								each t in teams
+									if d.indexOf(t.division) != -1 && d.indexOf(t.sub_division.toUpperCase()) != -1
+										option(value='#{t.id}')=t.short_name
+									else if d.indexOf(t.division) != -1 && d.indexOf('WC') != -1
+										option(value='#{t.id}')=t.short_name
+
+				button.flat-button(type='submit') Submit
+
+
+	script(type="text/javascript").
+		var teams = !{JSON.stringify(teams)};
+
+		$(function() {
+			$("form").on("submit", submit);
+		});
+
+		function showOddsContainer(e) {
+			$(".odds-container").removeClass("hidden");
+			$(".winners-container").addClass("hidden");
+		};
+
+		function showWinnersContainer(e) {
+			$(".winners-container").removeClass("hidden");
+			$(".odds-container").addClass("hidden");
+		};
+
+		function debug() {
+			var sample = ["11/5","3/1","12/1","13/1","14/1","18/1","18/1","25/1","28/1","30/1","32/1","40/1","45/1","60/1","100/1","125/1"];
+
+			function rand_sample() {
+				return sample[Math.floor(Math.random() * sample.length)];
+			};
+
+			$(".odds-container").find("input").each(function() {
+				$(this).val(rand_sample());
+			});
+		};
+
+		function submit(e) {
+
+			e.preventDefault();
+			e.stopPropagation();
+
+			// Verify that all odds are entered
+			var valid = true;
+			$(".odds-container").find("input").each(function() {
+				if ($(this).val().length == 0) valid = false;
+			});
+
+			if (!valid)
+				return $(".error-container").text("Missing some odds, can't submit");
+
+
+			// Get params
+			var odds_by_team = {};
+			$(".odds-group").each(function() {
+				var team_id = $(this).data("tid");
+				odds_by_team[team_id] = {
+					wildcard_winner: is_winner(team_id, true),
+					division_winner: is_winner(team_id, false)
+				}
+				$(this).find('input').each(function() {
+					odds_by_team[team_id][$(this).attr("name")] = $(this).val();
+				});
+			});
+
+			function is_winner(team_id, is_wildcard) {
+				var $selector = $("option:selected[value='" + team_id + "']");
+				return $selector.length > 0 && $selector.parent().data("is_wildcard") == is_wildcard;
+			};
+
+			console.log("Odds - ",odds_by_team)
+
+			$.post("/api/set_odds", { odds: JSON.stringify(odds_by_team) }, function(res) {
+				if (res.success)
+					$(".success-container").text('Success!')
+				else
+					$(".error-container").text("Error:: ",res.error);
+			},'json');
+
+		};
+
+
+

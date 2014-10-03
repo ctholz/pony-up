@@ -1,0 +1,12 @@
+
+
+TODO:
+
+Edge Cases
+     + Already have an account + picks, go through picker flow again (overwrite picks)
+     + AutoGen emails
+     + Sign in errors
+     + PW reset
+     + Explaining scores
+     + Cron to auto copy picks for next week if needed
+     + Testing to make sure that scores are valid

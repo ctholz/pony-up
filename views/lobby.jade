@@ -1,0 +1,125 @@
+extends layout
+
+
+block content
+
+	.col-md-10.col-md-offset-1
+		h1 Welcome to the Lobby
+		p Join a league from the list below (some will require a password), or 
+			a(href="/create") create your own.
+
+
+
+		h3 Active Leagues
+		if leagues.length == 0
+			p No active leagues at the moment...
+		table#lobby-table.table.table-hover
+			th
+			th League Title
+			th Commissioner
+			th
+
+			tbody
+				each league,i in leagues
+					tr(name='league-row', data-lid='#{league.id}')
+						td #{i+1}
+						td=league.title
+						td #{[league.commissioner.first_name,league.commissioner.last_name].join(" ")}
+						- var btn_klass = (league.password) ? '' : 'btn-lighter'
+						td(name='join-cell', data-lid='#{league.id}', data-private="#{league.password != null}") 
+							button(class="flat-button #{btn_klass}", name="join-button") Join &nbsp;
+								if league.password
+									i.fa.fa-lock
+								else
+									i.fa.fa-unlock
+
+
+
+	script(type="text/javascript").
+		var selections = localStorage.getItem("selections");
+		console.log('S::',JSON.parse(selections))
+
+		var my_leagues = !{JSON.stringify(my_leagues)},
+			my_weekly_picks = !{JSON.stringify(my_weekly_picks)},
+			has_picked = !{JSON.stringify(has_picked)};
+
+		var user = !{JSON.stringify(user)}
+
+		$(function() {
+			// 
+			updateButtons();
+			// 
+			$(document).on("click", "button[name='join-button']", function(e) {
+				if ($(this).parent().data("private"))
+					openJoin(e)
+				else {
+					var $cell = $(this).parent()
+					joinGame($(this), $cell.data("lid"), null);
+				}
+			});
+
+			// TODO: what if user gets here without making selections??
+
+		});
+
+		// Handler - button click
+		function openJoin(e) {
+			var $btn = $(e.currentTarget),
+				$cell = $(e.currentTarget).parent();
+
+			if ($btn.data("opened"))
+				return joinGame($btn, $cell.data('lid'), $cell.find('input').val());
+
+			$btn
+				.data("opened",true)
+				.before("<input class='form-control-override inline' type='text' maxlength='24' placeholder='Password' />");
+		};
+
+		// Hanlder - button click that hits the api and attempts to join game
+		function joinGame($btn, league_id, pw_input) {
+
+			// Time password (if applicable) 
+			if (pw_input) {
+				pw_input = pw_input.trim();
+				if (pw_input.length == 0)
+					return $btn.fadeOut(125).fadeIn(125);
+			}
+
+			// Update btn text
+			$btn.addClass("disabled").text("Working...")
+
+			// ** If during onboarding, will have no user object to join */
+			$.post('/api/join_league', { league_id: league_id, password: pw_input }, function(res) {
+				if (res.success) {
+					// If user exists, go to dashboard
+					if (user) {
+						window.location = "/dashboard/" + league_id;
+					// Else, set local storage and go to sign up
+					} else {
+						localStorage.setItem("league", league_id);
+						window.location = "/sign_up";
+					}
+
+				} else {
+					$btn.parent().find("input").addClass("error-input");
+					$btn.text("Join").removeClass("disabled");
+				}
+			}, 'json');
+		};
+
+		function updateButtons() {
+			var league_ids = _.pluck(my_leagues, 'id');
+
+			$("tr[name='league-row']").each(function() {
+				// Update buttons if already a member
+				if (league_ids.indexOf($(this).data("lid")) != -1) {
+
+					var $cell = $(this).find("td[name='join-cell']"),
+						lid = $(this).data("lid");
+					$cell
+						.empty()
+						.append("<a class='flat-button dashboard-button button-inverted' href='/dashboard/" + lid + "'>Go to dash</a>")
+				}
+			});
+		};
+

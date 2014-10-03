@@ -1,0 +1,67 @@
+extends layout
+
+block content
+
+	.row
+		.col-md-6
+			h1 League: #{league.title}
+			br
+
+	.row
+		.col-md-8
+			table#my-picks-table.picks-table.table.table-bordered
+				th Week
+				each heading, i in pick_ordering
+					th=heading
+
+				tbody
+					each pick, i in picks
+						tr
+							td #{pick.week}
+
+							each team_name, j in pick.formatted_picks
+								td(title="#{team_name}")
+									img.dashboard-team-thumbnail(src="/images/#{team_name}.png")
+
+					- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] : WEEK_OF_SEASON;
+					- for (var j = start_week; j <= 17; j++) { 
+						tr
+							td #{j}
+
+							if in_picking_window && j == picks.length + 1 && picks.length < WEEK_OF_SEASON
+								td.align-center.bold(colspan="#{pick_ordering.length}")
+									a(href='/picker?lid=#{lid}') Make your picks for next week!
+							else
+								- for (var k = 0; k < pick_ordering.length; k++) {
+									td 
+								- }
+					- }
+		.col-md-4
+			table#players-table.table.table-bordered
+				th
+				th Player
+				th.tooltipper(data-toggle='tooltip', title='If the season ended today') Points*
+				tbody
+					each player, i in players
+						tr
+							td #{i + 1}
+							td #{[player.first_name, player.last_name.slice(0,1)].join(' ')}
+							td #{player.projected_points}
+
+
+	script(type="text/javascript", src="/javascripts/dashboard.js")
+	script(type="text/javascript").
+		var teams = 				!{JSON.stringify(teams)},
+			picks = 				!{JSON.stringify(picks)},
+			league = 				!{JSON.stringify(league)},
+			players = 				!{JSON.stringify(players)},
+			odds = 					!{JSON.stringify(odds)},
+			in_picking_window = 	!{JSON.stringify(in_picking_window)};
+
+
+
+
+
+
+
+

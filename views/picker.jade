@@ -1,0 +1,57 @@
+extends layout
+
+block content
+
+	if !user
+		.row-fluid
+			.col-md-10.col-md-offset-1.align-center.module
+				h1 Welcome to Pony Up: NFL Playoff Predictor
+				.marketing-container(style="background-color: #f8f8f8; min-height: 225px; border-radius: 2px; text-align: center; padding: 12px 24px;")
+					h3 Marketing mix goes here 
+
+	.row-fluid
+		.col-md-10.col-md-offset-1.module.picker-container
+			each division,i in Object.keys(teams)
+
+				//- Only show the first division for now
+				- var klass = (i > 0) ? "hidden" : ""
+				.division-container(class="#{klass}")
+					h2 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
+					h3.guidance-text Step 1 of 4: Pick one winner of each division
+					p#error-container.error
+
+					each sub_division in Object.keys(teams[division])
+						h3=sub_division
+						.row-fluid
+							each team in teams[division][sub_division]
+								.col-md-3.col-sm-6
+									.team-pick-with-logo-container(name="#{team.short_name}",data-division="#{division}",data-sub_division="#{sub_division}")
+										p.bolder &mdash; #{team.long_name} &mdash;
+										img(src='/images/#{team.short_name}.png')
+										.display-odds Win Division: #{team.division_odds_display} = 
+											b #{team.division_odds} pts
+										.display-odds Win Wildcard: #{team.wc_odds_display} = 
+											b #{team.wc_odds} pts
+										if team.wc_winner
+											.crest-container
+												.wc-winner-crest.crest(title="Currently holding a Wilcard spot.") WC
+										if team.division_winner
+											.crest-container
+												.division-winner-crest.crest(title="Currently leading the division.")
+													span.glyphicon.glyphicon-star
+
+
+			.button-container
+				button.pull-right.flat-button.blue-button(name='next') Next (1/4)
+
+
+	script(type="text/javascript", src="/javascripts/picker.js")
+	script(type="text/javascript").
+		var teams = 	!{JSON.stringify(teams)},
+			user = 		!{JSON.stringify(user)},
+			lid = 		!{JSON.stringify(lid)};
+
+
+
+
+

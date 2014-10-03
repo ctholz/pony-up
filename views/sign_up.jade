@@ -1,0 +1,106 @@
+extends layout
+
+block content
+
+	.row
+		.col-md-4.col-md-offset-4
+			h1 Sign 'yer ass up
+
+			if errors
+				.error=errors[0]['text']
+
+			h5#encouragement-text.invisible.green Almost there! After this form you're all set.
+
+			form#new-user-form.form(role='form')
+
+				.form-group
+					label(for="firstNameInput") First Name
+					input#firstNameInput.form-control-override(type="text", maxlength="24", name="firstName", required)
+
+				.form-group
+					label(for="lastNameInput") Last Name 
+					input#lastNameInput.form-control-override(type="text", maxlength="24", name="lastName", required)
+
+				.form-group
+					label(for="emailInput") Email
+					input#emailInput.form-control-override(type="email", maxlength="24", name="email", required)
+
+				.form-group
+					label(for="passwordInput") Password 
+					em (Don't screw this up&mdash;we don't reset passwords)
+					input#passwordInput.form-control-override(type="password", maxlength="24", name="password", required)
+
+				//-.form-group
+					//-label(for="favTeamSelect") Your Team
+					//-select#favTeamSelect(name='favoriteTeam', required)
+						//-each team in teams
+							//-option(value='#{team}')=team				
+
+				if is_commissioner
+					.form-group
+						input(type="hidden", name="commissioner", value="#{lid}")
+
+				.form-group
+					button.flat-button(type="submit") Done
+
+	script(type="text/javascript").
+
+		var first_time_visitor = false;
+
+		$(function() {
+
+			if (localStorage.getItem("first_time_visitor") === "true") {
+				first_time_visitor = true;
+				$("#encouragement-text").removeClass("invisible");
+			}
+
+			$("#new-user-form").on("submit", submit);
+		});
+
+		function submit(e) {
+			e.preventDefault();
+			e.stopPropagation(); 
+
+			// Add inputs
+			var data = {};
+			$(this).find("input").each(function() {
+				data[$(this).attr("name")] = $(this).val();
+			});
+
+			// Add select
+			//$(this).find("select")
+
+			// If in onboarding, add localStorage items
+			if (first_time_visitor) {
+				data.is_commissioner = ($("input[name='commissioner']").length != 0)
+				data.league_id = (data.is_commissioner) ? $("input[name='commissioner']").val() : localStorage.getItem("league");
+				data.selections = localStorage.getItem("selections");
+			};
+
+			// 
+			data.in_onboarding = first_time_visitor
+
+			// Now, push to api
+			console.log("Data:: ",data);
+
+			function replyHandler(res) {
+				if (res.success) {
+					// Clear local storage... TODO:: only specific keys?
+					localStorage.clear();
+					// Success - redirect
+					window.location = ('next' in res) ? res.next : '/lobby';
+
+				} else {
+					$btn.text("Done").attr("disabled",false);
+					alert("bad news")
+				}
+			};
+
+			// Hit API
+
+			var $btn = $(this).find("button[type='submit']");
+			$btn.text("Working...").attr("disabled",true);
+			$.post("/api/sign_up", data, replyHandler, "json");
+		};
+
+
