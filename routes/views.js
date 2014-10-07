@@ -157,11 +157,29 @@ exports.picker = function(req,res) {
 /* View -- admin */
 exports.admin = function(req, res) {
 
+	var users = [];
+
 	db.Team.findAll({where: {status: 'active'}}).success(function(teams) {
 
-		res.render('admin', {
-			teams: 				teams,
-			pick_ordering: 		helpers.getPickOrdering()
+		db.User.findAll().success(function(users) {
+
+			var counter = users.length;
+			users.forEach(function(user) {
+
+				user.getLeagues().success(function(leagues) {
+					user = user.values;
+					user.leagues = (leagues) ? leagues.map(function(league) { return league.title }).join(", ") : "";
+					user.createdAt = user.createdAt.toDateString();
+					users.push(user);
+
+					if (--counter == 0)
+						return res.render('admin', {
+							teams: 				teams,
+							pick_ordering: 		helpers.getPickOrdering(),
+							users: 				users
+						});
+				});
+			});
 		});
 	});
 };

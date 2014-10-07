@@ -7,12 +7,14 @@ block content
 		h1 Admin
 		.error-container.error
 		.success-container.green
-		.col-sm-4
+		.col-sm-3
 			button.flat-button(onclick="showOddsContainer()") Enter Odds 
-		.col-sm-4
+		.col-sm-3
 			button.flat-button(onclick="showWinnersContainer()") Enter Division Leaders
-		.col-sm-4
+		.col-sm-3
 			button.flat-button.red-button(onclick="debug()") Debug
+		.col-sm-3
+			button.flat-button(onclick="showStatsContainer()") Show Stats
 
 
 	.row.odds-container.hidden
@@ -56,9 +58,23 @@ block content
 
 				button.flat-button(type='submit') Submit
 
+	.row.stats-container.hidden
+		.col-md-10.col-md-offset-1
+			h1 Stats
+
+			table.table
+				each u, i in users
+					tr
+						td #{u.first_name + ' ' + u.last_name}
+						td=u.email
+						td=u.leagues
+						td=u.createdAt
+
+
 
 	script(type="text/javascript").
-		var teams = !{JSON.stringify(teams)};
+		var teams = !{JSON.stringify(teams)},
+			users = !{JSON.stringify(users)};
 
 		$(function() {
 			$("form").on("submit", submit);
@@ -67,11 +83,19 @@ block content
 		function showOddsContainer(e) {
 			$(".odds-container").removeClass("hidden");
 			$(".winners-container").addClass("hidden");
+			$(".stats-container").addClass("hidden");
 		};
 
 		function showWinnersContainer(e) {
 			$(".winners-container").removeClass("hidden");
 			$(".odds-container").addClass("hidden");
+			$(".stats-container").addClass("hidden");
+		};
+
+		function showStatsContainer(e) {
+			$(".stats-container").removeClass("hidden");
+			$(".odds-container").addClass("hidden");
+			$(".winners-container").addClass("hidden");
 		};
 
 		function debug() {

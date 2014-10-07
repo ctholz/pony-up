@@ -55,7 +55,7 @@ html
             else
                 .navbar-right
                     h4 #{user.fullName()}
-                        a.logout(href='/logout') Logout
+                        a.logout(onclick="logout()" href="#") Logout
 
     .container
         block content
@@ -65,4 +65,9 @@ html
 
         var WEEK_OF_SEASON = !{JSON.stringify(week_of_season)},
             WEEKS_REMAINING = !{JSON.stringify(WEEKS_REMAINING)};
+
+        function logout() {
+            localStorage.clear();
+            window.location = "/logout";
+        };
 
