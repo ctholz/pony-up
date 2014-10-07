@@ -39,20 +39,36 @@ exports.set_odds = function(req, res) {
 		var odds_for_team = odds[team.id];
 		console.log('Odd for ',team.short_name,' -- ',odds_for_team,"  :: ",helpers.formatOddsForDB(odds_for_team));
 
-		// TODO - what if already made and need to overwrite
 
-		db.Odd.create({
-			week: 			CONSTANTS.WEEK_OF_SEASON,
-			odds: 			helpers.formatOddsForDB(odds_for_team),
-			status: 		'active',
-			TeamId: 		team.id
-		}).success(function(odd) {
-			console.log("Odd added for [",team.short_name,"]");
+		db.Odd.find({where: { week: CONSTANTS.WEEK_OF_SEASON, TeamId: team.id }}).success(function(old_odd) {
+			
+			var callback = function() {
+				console.log("Odd added for [",team.short_name,"]");
+				if (--ctr == 0)
+					return res.json({success: true});
+			},
+				odd_data = {
+					week: 			CONSTANTS.WEEK_OF_SEASON,
+					odds: 			helpers.formatOddsForDB(odds_for_team),
+					status: 		'active',
+					TeamId: 		team.id
+			}
 
-			if (--ctr == 0)
-				res.json({success:true})
+			if (old_odd) {
+				old_odd.destroy().success(function() {
+					console.log("Destroyed old odd for [",team.short_name,"]");
+					createOdd(odd_data, callback);
+				});
+			} else
+				createOdd(odd_data, callback);
 		});
 	});
+
+	function createOdd(odd,callback) {
+		db.Odd.create(odd).success(function(new_odd) {
+			callback();
+		});
+	};
 };
 
 /* API - signs a user in (logic handled by passport middleware) */
