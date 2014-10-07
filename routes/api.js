@@ -184,7 +184,7 @@ exports.join_league = function(req, res) {
 	var league_id = req.body.league_id,
 		password = req.body.password;
 
-	if (password == "") password = null
+	if (password == "") password = null;
 
 	// Dumb validation
 	if (!league_id || isNaN(parseInt(league_id)))
@@ -200,12 +200,8 @@ exports.join_league = function(req, res) {
 		if (typeof req.user != "undefined") {
 
 			league.addPlayer(req.user).success(function() {
-				league.getPlayers().success(function(players) {
-					console.log("LEAGUE NOW HAS ",players.length," PLAYERS\n\n");
-
-					req.user.addLeague(league).success(function() {
-						return res.redirect("/dashboard/" + league.id);
-					});
+				req.user.addLeague(league).success(function() {
+					return res.json({ success: true });
 				});
 			});
 		} else {

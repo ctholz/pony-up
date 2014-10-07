@@ -49,8 +49,8 @@ function togglePick(e) {
 		if ($pick.hasClass("picked"))
 			return $pick.removeClass("picked").removeClass("picked-wildcard");
 
-		if ($sub_division.find(".picked-wildcard").length > 0)
-			$sub_division.find(".picked-wildcard").removeClass("picked-wildcard").removeClass("picked");
+		// if ($sub_division.find(".picked-wildcard").length > 0)
+		// 	$sub_division.find(".picked-wildcard").removeClass("picked-wildcard").removeClass("picked");
 		
 		$pick.addClass("picked").addClass("picked-wildcard");
 

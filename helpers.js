@@ -150,10 +150,10 @@ exports.appendOddsToTeams = function(teams, odds) {
 	// 
 	teams.forEach(function(team) {
 		var team_odds = odds_dict[team.id];
-		team["division_odds_display"] = String(team_odds.odds[0]) + "/" + String(team_odds.odds[1]);
-		team["division_odds"] = team_odds.odds[0] / team_odds.odds[1];
-		team["wc_odds_display"] = String(team_odds.odds[2]) + "/" + String(team_odds.odds[3]);
-		team["wc_odds"] = team_odds.odds[2] / team_odds.odds[3];
+		team["division_odds_display"] = String(team_odds.odds[2]) + "/" + String(team_odds.odds[3]);
+		team["division_odds"] = team_odds.odds[2] / team_odds.odds[3];
+		team["wc_odds_display"] = String(team_odds.odds[0]) + "/" + String(team_odds.odds[1]);
+		team["wc_odds"] = team_odds.odds[0] / team_odds.odds[1];
 
 		team["wc_winner"] = Boolean(team_odds.odds[4]);
 		if (team.wc_winner)

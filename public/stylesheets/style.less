@@ -151,7 +151,8 @@ a {
 
 a.flat-button {
 	text-decoration: none !important;
-	padding: 6px 8px;
+	padding: 6px 10px;
+	white-space: nowrap;
 }
 
 a.flat-button:hover {
@@ -273,13 +274,27 @@ a.flat-button:hover {
 	min-height: 58px;
 }
 
-
-
 .marketing-container p {
 	width: 85%;
 	margin: 0 auto;
 	padding: 10px;
 	font-size: 12pt;
+}
+
+@media screen and (max-width: 480px) { 
+	body { padding: 0 !important; }
+
+}
+
+@media(max-width:767px) {
+	body { padding: 0 !important; }
+
+	.form-group { display: inline-block !important; }
+
+	// .navbar-form input.left {
+	// 	border-right: 2px solid white !important;
+	// 	width: 175px;
+	// }
 }
 
 

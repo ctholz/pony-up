@@ -20,7 +20,7 @@ block content
 			th
 			th League Title
 			th Commissioner
-			th
+			th 
 
 			tbody
 				each league,i in leagues
@@ -40,7 +40,7 @@ block content
 
 	script(type="text/javascript").
 		var selections = localStorage.getItem("selections");
-		console.log('S::',JSON.parse(selections))
+		console.log('Selections::',JSON.parse(selections))
 
 		var my_leagues = !{JSON.stringify(my_leagues)},
 			my_weekly_picks = !{JSON.stringify(my_weekly_picks)},
@@ -89,10 +89,11 @@ block content
 			}
 
 			// Update btn text
-			$btn.addClass("disabled").text("Working...")
+			$btn.addClass("disabled").text("Working...");
 
 			// ** If during onboarding, will have no user object to join */
 			$.post('/api/join_league', { league_id: league_id, password: pw_input }, function(res) {
+				console.log("Res:",res);
 				if (res.success) {
 					// If user exists, go to dashboard
 					if (user) {
