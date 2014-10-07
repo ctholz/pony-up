@@ -3,9 +3,19 @@ extends layout
 block content
 
 	.row
-		.col-md-6
+		.col-md-8
 			h1 League: #{league.title}
-			br
+		.col-md-4
+			h3 Picking Window: 
+				if in_picking_window  
+					span.green Open
+				else
+					span.red Closed
+
+			if in_picking_window
+				p You're free to make your picks for next week!
+			else
+				p The picking window will open Tuesday morning, once all games this week have been played. 
 
 	.row
 		.col-md-8

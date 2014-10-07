@@ -85,7 +85,9 @@ exports.sign_up = function(req, res) {
 			req.logIn(user, function(err) {
 				if (err) throw err;
 
-				if (in_onboarding) {
+				mailer.sendWelcomeEmail(user);
+
+				if (in_onboarding === "true") {
 					var makeSelections = function(err) {
 						if (typeof err !== "undefined" && err)
 							return res.json({success: false, error: err});

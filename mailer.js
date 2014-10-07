@@ -57,7 +57,7 @@ exports.sendBasic = function(text, subject, callback) {
 };
 
 
-exports.sendWelcomeEmail = function() {
+exports.sendWelcomeEmail = function(recipient, callback) {
 
 	var key = "welcome-email"
 
