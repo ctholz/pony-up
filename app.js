@@ -9,6 +9,8 @@ var bodyParser = require('body-parser');
 var http = require('http');
 var crypto = require('crypto');
 
+var initializer = require('./initializer')
+
 /* 3rd Party Modules */
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -256,18 +258,6 @@ function passwordProtected(req, res, next) {
     else 
         return next();
 };
-
-
-/* --  CONSTANTS   --*/
-global.CONSTANTS = {
-    WEEK_OF_SEASON:         5,
-    WEEKS_IN_SEASON:        17,
-    MASTER_PASSWORD:        "tinaseelig",
-    CRYPTO_KEY:             "innovation",
-    MANDRILL_API_KEY:       "ot_cp4jYJNhpl8R6NTBY3g"
-}
-
-
 
 
 
