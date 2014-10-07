@@ -29,13 +29,13 @@ block content
 										p.bolder &mdash; #{team.long_name} &mdash;
 										img(src='#{team.logo_path}')
 										.display-odds Win Division: #{team.division_odds_display} = 
-											b #{team.division_odds} pts
+											b #{team.division_odds.toFixed(2)} pts
 										.display-odds Win Wildcard: #{team.wc_odds_display} = 
-											b #{team.wc_odds} pts
-										if team.wc_winner
+											b #{team.wc_odds.toFixed(2)} pts
+										//-if team.wc_winner
 											.crest-container
 												.wc-winner-crest.crest(title="Currently holding a Wilcard spot.") WC
-										if team.division_winner
+										//-if team.division_winner
 											.crest-container
 												.division-winner-crest.crest(title="Currently leading the division.")
 													span.glyphicon.glyphicon-star

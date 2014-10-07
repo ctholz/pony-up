@@ -5,10 +5,13 @@ block content
 
 	.col-md-10.col-md-offset-1
 		h1 Welcome to the Lobby
+
+		if !user
+			p
+				span.highlight Almost there! If you're already a Pony Up member, sign in at the top right. 
+
 		p Join a league from the list below (some will require a password), or 
-			a(href="/create") create your own.
-
-
+			a.flat-button(href="/create") Create a Game
 
 		h3 Active Leagues
 		if leagues.length == 0
@@ -118,7 +121,7 @@ block content
 						lid = $(this).data("lid");
 					$cell
 						.empty()
-						.append("<a class='flat-button dashboard-button button-inverted' href='/dashboard/" + lid + "'>Go to dash</a>")
+						.append("<a class='flat-button dashboard-button button-inverted' href='/dashboard/" + lid + "'>View League</a>")
 				}
 			});
 		};

@@ -36,13 +36,14 @@ exports.dashboard = function(req, res) {
 					player.picks = picks.map(function(pick) { return pick.values; });
 
 					player.projected_points = helpers.getProjectedPoints(player.picks, res.locals.odds, res.locals.teams);
+					player.picks = helpers.formatPicksForView(res.locals.teams, player.picks);
 				}
 
 				if (--counter == 0) {
 					// Sort players by projected points
 					data.players = data.players.sort(function(a,b) {
 						return b.projected_points - a.projected_points;
-					})
+					});
 
 					return res.render("dashboard", data);
 				}

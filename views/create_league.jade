@@ -12,11 +12,11 @@ block content
 			form#new-league-form.form(role='form', method='post', action='/api/create_league')
 
 				.form-group
-					label(for="titleInput") Name
+					label(for="titleInput") League Name
 					input#titleInput.form-control-override(type="text", name="title" placeholder="The Golden Years", required)
 
 				.form-group
-					label(for="passwordInput") Password 
+					label(for="passwordInput") League Password 
 						em (optional&mdash;if this is left blank, your league will be open to the public)
 					input#passwordInput.form-control-override(type="password", name="password")
 

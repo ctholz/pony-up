@@ -19,7 +19,7 @@ block content
 
 	.row
 		.col-md-8
-			table#my-picks-table.picks-table.table.table-bordered
+			table#my-picks-table.picks-table.table.table-bordered.table-open(data-pid="#{user.id}")
 				th Week
 				each heading, i in pick_ordering
 					th=heading
@@ -27,7 +27,7 @@ block content
 				tbody
 					each pick, i in picks
 						tr
-							td #{pick.week}
+							td=pick.week
 
 							each team, j in pick.formatted_picks
 								td(title="#{team.name}")
@@ -46,6 +46,22 @@ block content
 									td 
 								- }
 					- }
+
+			each p, i in players
+				if p.id != user.id
+					table.picks-table.table.table-bordered.hidden(data-pid="#{p.id}")
+						th Week
+						each heading, i in pick_ordering
+							th=heading
+						tbody
+							each pick, i in p.picks
+								tr
+									td=pick.week
+									each team,j in pick.formatted_picks
+										td(title="#{team.name}")
+											img.dashboard-team-thumbnail(src="#{team.logo_path}")
+
+
 		.col-md-4
 			table#players-table.table.table-bordered
 				th
@@ -53,10 +69,26 @@ block content
 				th.tooltipper(data-toggle='tooltip', title='If the season ended today') Points*
 				tbody
 					each player, i in players
-						tr
+						- var klass = (player.id == user.id) ? 'row-highlight' : ''
+						tr(class='#{klass}')
 							td #{i + 1}
-							td #{[player.first_name, player.last_name.slice(0,1)].join(' ')}
-							td #{player.projected_points}
+							td(onclick="showPlayerPicks(this, #{player.id})")
+								a(href="#") #{[player.first_name, player.last_name.slice(0,1)].join(' ')}
+							td #{player.projected_points.toFixed(2)}
+
+			p.align-center *Note: All scores are based on current standings and will change from week to week
+
+			br
+
+			h5.align-center Invite players to join your league using the information below!
+			.row
+				.col-md-6.col-md-offset-3
+					p League Title: #{league.title}
+					if league.password
+						p League Password: #{league.password}
+					else
+						p (No password)
+
 
 
 	script(type="text/javascript", src="/javascripts/dashboard.js")
@@ -67,6 +99,14 @@ block content
 			players = 				!{JSON.stringify(players)},
 			odds = 					!{JSON.stringify(odds)},
 			in_picking_window = 	!{JSON.stringify(in_picking_window)};
+
+		function showPlayerPicks(context, pid) {
+			$("tr.row-highlight").removeClass("row-highlight")
+			$(context).parent().addClass("row-highlight")
+
+			$("table.table-open").removeClass("table-open").addClass("hidden");
+			$(".picks-table[data-pid='" + pid + "']").addClass("table-open").removeClass("hidden");
+		};
 
 
 

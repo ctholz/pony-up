@@ -69,7 +69,8 @@ exports.sign_up = function(req, res) {
 		in_onboarding = req.body.in_onboarding;
 
 	function _error(err) {
-		return res.render("sign_up", { errors: [err] });
+		console.log("Err - ",err);
+		return res.json({success:false, error: err.text})
 	};
 
 	function _createUser() {
@@ -98,7 +99,7 @@ exports.sign_up = function(req, res) {
 						createPicks(selections, user, CONSTANTS.WEEK_OF_SEASON, req.body.league_id, function(err, picks) {
 							if (err) {
 								console.error("___ERROR___: createPicks callback - ",err);
-								return res.json({success: false});
+								return res.json({success: false, error: { text: "Something went wrong saving your picks. Please try again."}});
 							} else {
 								console.log("___SUCCESS___: picks set - ",picks.values);
 								return res.json({success:true, next:'/dashboard/' + req.body.league_id});
@@ -123,10 +124,10 @@ exports.sign_up = function(req, res) {
 	if (req.body.firstName.length == 0 || req.body.lastName.length == 0 || req.body.password.length == 0 || req.body.email.length == 0)
 		return _error({field:null, text:'No spaces, please.'});
 
-	db.User.find({where:{ email: req.body.email }}).success(function(user) {
+	db.User.find({where:{ email: req.body.email.trim().toLowerCase() }}).success(function(user) {
 		if (user) return _error({field: "email", text: "There's already a Pony Up user registered with that email address, please use another."})
 
-		_createUser();
+		return _createUser();
 	});
 };
 
