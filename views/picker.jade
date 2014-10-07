@@ -4,11 +4,18 @@ block content
 
 	if !user
 		.row-fluid
-			.col-md-10.col-md-offset-1.align-center.module
-				h1 Welcome to Pony Up: NFL Playoff Predictor
-				.marketing-container(style="background-color: #f8f8f8; min-height: 225px; border-radius: 2px; text-align: center; padding: 12px 24px;")
-					h3 Marketing mix goes here 
-
+			.col-md-12.module
+				.marketing-container(style="background-color: #f8f8f8; min-height: 225px; border-radius: 2px; padding: 12px 24px;")
+					//h2.align-center Pony Up Picks: NFL Playoff Prediction Contest
+					div.align-center
+						img(src="/images/logo.png", style='max-width: 100%;')
+					h3.align-center NFL Playoff Prediction Contest - Beat your friends, win money
+					p
+						b The Rules: 
+						| Pick the winner of each division, and the two wildcard teams each week. The more unlikely your pick is to win (at the time of your pick), the more points you get if they do. 
+					p
+						b The Reason: 
+						| Winner gets $100, bragging rights, and the title of Pony Up Champion.
 	.row-fluid
 		.col-md-10.col-md-offset-1.module.picker-container
 			each division,i in Object.keys(teams)
@@ -16,8 +23,8 @@ block content
 				//- Only show the first division for now
 				- var klass = (i > 0) ? "hidden" : ""
 				.division-container(class="#{klass}")
-					h2 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
-					h3.guidance-text Step 1 of 4: Pick one winner of each division
+					h3 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
+					h4.guidance-text Step 1 of 4: Pick one winner of each division
 					p#error-container.error
 
 					each sub_division in Object.keys(teams[division])
@@ -29,9 +36,9 @@ block content
 										p.bolder &mdash; #{team.long_name} &mdash;
 										img(src='#{team.logo_path}')
 										.display-odds Win Division: #{team.division_odds_display} = 
-											b #{team.division_odds.toFixed(2)} pts
+											b #{Math.round(team.division_odds)} pts
 										.display-odds Win Wildcard: #{team.wc_odds_display} = 
-											b #{team.wc_odds.toFixed(2)} pts
+											b #{Math.round(team.wc_odds)} pts
 										//-if team.wc_winner
 											.crest-container
 												.wc-winner-crest.crest(title="Currently holding a Wilcard spot.") WC

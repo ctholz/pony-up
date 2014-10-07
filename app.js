@@ -67,7 +67,12 @@ passport.deserializeUser(function(id, done) {
 /* View Routes */
 
 // NOTE -- all regular views must call 'fetchBasics' middleware or will JS bug
-app.get('/welcome', fetchBasics, fetchTeams, fetchOdds, views.picker);
+app.get('/welcome', fetchBasics, fetchTeams, fetchOdds, function(req,res) {
+    if (req.isAuthenticated())
+        res.redirect('/')
+    else
+        views.picker(req,res);
+});
 app.get('/', fetchBasics, fetchTeams, fetchOdds, function(req,res) {
     if (req.isAuthenticated())
         views.lobby(req,res);
