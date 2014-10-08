@@ -26,7 +26,9 @@ block content
 					h3 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
 					h4.guidance-text Step 1 of 4: Pick one winner of each division
 					div
-						span.highlight If you're already a Pony Up Member, please sign in before making your picks.
+						span.highlight After your make your picks, you'll have the chance to join a League and create your account.
+					div
+						span.highlight If you're already a Pony Up Member, please sign in (in the navbar) before making your picks.
 					p#error-container.error
 
 					each sub_division in Object.keys(teams[division])
@@ -37,12 +39,12 @@ block content
 									.team-pick-with-logo-container(name="#{team.short_name}",data-division="#{division}",data-sub_division="#{sub_division}")
 										p.bolder &mdash; #{team.long_name} &mdash;
 										img(src='#{team.logo_path}')
-										.display-odds Win Division: #{team.division_odds_display} = 
+										.display-odds(data-which="division") Win Division: #{team.division_odds_display} = 
 											if team.division_odds < 1
 												b #{team.division_odds.toFixed(2)} pts
 											else
 												b #{Math.round(team.division_odds)} pts
-										.display-odds Win Wildcard: #{team.wc_odds_display} = 
+										.display-odds.hidden(data-which="wildcard") Win Wildcard: #{team.wc_odds_display} = 
 											if team.wc_odds < 1
 												b #{team.wc_odds.toFixed(2)}
 											else

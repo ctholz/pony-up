@@ -82,6 +82,8 @@ function submitDivisionPicks(e) {
 
 
 	if ($scope.step++ % 2 > 0) {
+		$(".display-odds").toggleClass("hidden");
+
 		$scope.in_wildcard_selection = true;
 		selectWildcards(e);
 
@@ -89,7 +91,7 @@ function submitDivisionPicks(e) {
 		savePicksAndRedirectToLobby();
 
  	} else {
-
+ 		$(".display-odds").toggleClass("hidden");
 
 		$scope.in_wildcard_selection = false;
 

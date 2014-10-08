@@ -33,7 +33,7 @@ block content
 								td(title="#{team.name}")
 									img.dashboard-team-thumbnail(src="#{team.logo_path}")
 
-					- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] : WEEK_OF_SEASON;
+					- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] + 1 : WEEK_OF_SEASON;
 					- for (var j = start_week; j <= 17; j++) { 
 						tr
 							td #{j}
@@ -76,7 +76,7 @@ block content
 								a(href="#") #{[player.first_name, player.last_name.slice(0,1)].join(' ')}
 							td #{player.projected_points.toFixed(2)}
 
-			p.align-center *Note: All scores are based on current standings and will change from week to week
+			p.align-center *Note: Scored as if the season ended today. Will change week-to-week.
 
 			br
 

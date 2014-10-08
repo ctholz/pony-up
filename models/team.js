@@ -8,5 +8,13 @@ module.exports = function(sequelize, DataTypes) {
   	sub_division:   { type: DataTypes.ENUM('North', 'South', 'East', 'West'), validate: { notEmpty: true, notNull: true }},
 	logo: 			{ type: DataTypes.STRING },
 	status: 		{ type: DataTypes.STRING, defaultValue: 'active' },
+	wins: 			{ type: DataTypes.INTEGER, defaultValue: 0 },
+	losses: 		{ type: DataTypes.INTEGER, defaultValue: 0}
+	}, {
+		instanceMethods: {
+			record: function() {
+				return [this.wins, this.losses].join("-")
+			}
+		}
 	});
 }
