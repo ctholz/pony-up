@@ -31,6 +31,10 @@ block content
 					em (Don't screw this up&mdash;we don't reset passwords)
 					input#passwordInput.form-control-override(type="password", maxlength="24", name="password", required)
 
+				.form-group
+					label(for="confirmPasswordInput") Confirm Password
+					input#confirmPasswordInput.form-control-override(type="password", maxlength="24", name="confirmPassword", required)
+
 				//-.form-group
 					//-label(for="favTeamSelect") Your Team
 					//-select#favTeamSelect(name='favoriteTeam', required)
@@ -62,11 +66,21 @@ block content
 			e.preventDefault();
 			e.stopPropagation(); 
 
+			// Clear old errors
+			$(".error-container").empty();
+
 			// Add inputs
 			var data = {};
 			$(this).find("input").each(function() {
 				data[$(this).attr("name")] = $(this).val();
 			});
+
+			// Do basic pw check
+			if (data.password !== data.confirmPassword) {
+				$(".error-container").text("Passwords don't match.");
+				return false;
+			}	
+
 
 			// Add select
 			//$(this).find("select")

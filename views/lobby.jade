@@ -19,7 +19,7 @@ block content
 		table#lobby-table.table.table-hover
 			th
 			th League Title
-			th Commissioner
+			th Members
 			th 
 
 			tbody
@@ -27,7 +27,7 @@ block content
 					tr(name='league-row', data-lid='#{league.id}')
 						td #{i+1}
 						td=league.title
-						td #{[league.commissioner.first_name,league.commissioner.last_name].join(" ")}
+						td #{league.players.join(", ")}
 						- var btn_klass = (league.password) ? '' : 'btn-lighter'
 						td(name='join-cell', data-lid='#{league.id}', data-private="#{league.password != null}") 
 							button(class="flat-button #{btn_klass}", name="join-button") Join &nbsp;
@@ -44,7 +44,8 @@ block content
 
 		var my_leagues = !{JSON.stringify(my_leagues)},
 			my_weekly_picks = !{JSON.stringify(my_weekly_picks)},
-			has_picked = !{JSON.stringify(has_picked)};
+			has_picked = !{JSON.stringify(has_picked)},
+			leagues = !{JSON.stringify(leagues)};
 
 		var user = !{JSON.stringify(user)}
 

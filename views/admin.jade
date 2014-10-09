@@ -7,17 +7,15 @@ block content
 		h1 Admin
 		.error-container.error
 		.success-container.green
-		.col-sm-3
-			button.flat-button(onclick="showOddsContainer()") Enter Odds 
-		.col-sm-3
-			button.flat-button(onclick="showWinnersContainer()") Enter Division Leaders
-		.col-sm-3
+		.col-sm-12.button-container
+			button.flat-button(onclick="toggleContainer('odds-container')") Enter Odds 
+			button.flat-button(onclick="toggleContainer('winners-container')") Enter Division Leaders
 			button.flat-button.red-button(onclick="debug()") Debug
-		.col-sm-3
-			button.flat-button(onclick="showStatsContainer()") Show Stats
+			button.flat-button(onclick="toggleContainer('win-loss-container')") Enter W/L Records
+			button.flat-button(onclick="toggleContainer('stats-container')") Show Stats
 
 
-	.row.odds-container.hidden
+	.row.odds-container.page-container.hidden
 		.col-md-10.col-md-offset-1
 			h1 Enter Odds 
 
@@ -36,7 +34,7 @@ block content
 
 				button.flat-button(type="submit") Submit
 
-	.row.winners-container.hidden
+	.row.winners-container.page-container.hidden
 		.col-md-10.col-md-offset-1
 			h1 Enter Division Leaders
 
@@ -58,7 +56,7 @@ block content
 
 				button.flat-button(type='submit') Submit
 
-	.row.stats-container.hidden
+	.row.stats-container.page-container.hidden
 		.col-md-10.col-md-offset-1
 			h1 Stats
 
@@ -70,6 +68,25 @@ block content
 						td=u.leagues
 						td=u.createdAt
 
+	.row.win-loss-container.page-container.hidden
+		.col-md-10.col-md-offset-1
+			h1 Enter W/L Records
+
+			form#records-form.form
+				each t,i in teams
+
+					if i % 4 == 0
+						.row
+
+					.col-md-3
+						.form-group.odds-group(data-tid="#{t.id}")
+							label.bold #{t.short_name} [#{t.division}] &nbsp;&nbsp;&nbsp;
+							input.form-control-override.input-inline-small(name="wins", type="number", min="0", max="17", placeholder="Wins", required)
+							input.form-control-override.input-inline-small(name="losses", type="number", min="0", max="17", placeholder="Losses", required)
+
+				button.flat-button(type="submit") Submit
+
+
 
 
 	script(type="text/javascript").
@@ -77,40 +94,36 @@ block content
 			users = !{JSON.stringify(users)};
 
 		$(function() {
-			$("form").on("submit", submit);
+			$("#winners-form").on("submit", submitOdds);
+			$("#records-form").on("submit", submitRecords);
 		});
 
-		function showOddsContainer(e) {
-			$(".odds-container").removeClass("hidden");
-			$(".winners-container").addClass("hidden");
-			$(".stats-container").addClass("hidden");
-		};
-
-		function showWinnersContainer(e) {
-			$(".winners-container").removeClass("hidden");
-			$(".odds-container").addClass("hidden");
-			$(".stats-container").addClass("hidden");
-		};
-
-		function showStatsContainer(e) {
-			$(".stats-container").removeClass("hidden");
-			$(".odds-container").addClass("hidden");
-			$(".winners-container").addClass("hidden");
+		function toggleContainer(which) {
+			$(".page-container").addClass("hidden");
+			$("." + which).removeClass("hidden");
 		};
 
 		function debug() {
-			var sample = ["11/5","3/1","12/1","13/1","14/1","18/1","18/1","25/1","28/1","30/1","32/1","40/1","45/1","60/1","100/1","125/1"];
+			var odds_sample = ["11/5","3/1","12/1","13/1","14/1","18/1","18/1","25/1","28/1","30/1","32/1","40/1","45/1","60/1","100/1","125/1"];
 
 			function rand_sample() {
-				return sample[Math.floor(Math.random() * sample.length)];
+				return odds_sample[Math.floor(Math.random() * odds_sample.length)];
 			};
+
+			function rand_win_loss() {
+				return Math.round(Math.random() * 16)
+			}
 
 			$(".odds-container").find("input").each(function() {
 				$(this).val(rand_sample());
 			});
+
+			$(".win-loss-container").find("input").each(function() {
+				$(this).val(rand_win_loss())
+			});
 		};
 
-		function submit(e) {
+		function submitOdds(e) {
 
 			e.preventDefault();
 			e.stopPropagation();
@@ -152,6 +165,29 @@ block content
 					$(".error-container").text("Error:: ",res.error);
 			},'json');
 
+		};
+
+		function submitRecords(e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			var data = {};
+
+			$(this).find(".form-group").each(function() {
+				data[$(this).data("tid")] = {
+					wins: 	$(this).find("input[name='wins']").val(),
+					losses: $(this).find("input[name='losses']").val()
+				}
+			});
+
+			console.log("D:: ",data)
+
+			$.post("/api/set_records", { records: JSON.stringify(data) }, function(res) {
+				if (res.success)
+					$(".success-container").text("Success!");
+				else
+					$(".error-container").text("Error:: ",res.error);
+			}, "json");	
 		};
 
 

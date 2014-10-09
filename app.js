@@ -95,6 +95,7 @@ app.post('/api/sign_up', api.sign_up);
 app.post('/api/join_league', api.join_league);
 app.post('/api/set_picks', api.set_picks);
 app.post('/api/set_odds', fetchTeams, api.set_odds);
+app.post('/api/set_records', api.set_records);
 
 // DEV DEV DEV //
 app.get('/test', api.test);
@@ -222,9 +223,11 @@ function fetchTeams(req, res, next) {
     db.Team.findAll({where:{status:'active'}}).success(function(teams) {
         res.locals.teams = teams.map(function(team) {
             // Augment obj with logo path
-            team = team.values;
-            team.logo_path = helpers.getLogoPathForTeamName(team.short_name);
-            return team;
+            var formatted_team = team.values;
+            formatted_team.logo_path = helpers.getLogoPathForTeamName(team.short_name);
+            formatted_team.record = team.record();  
+
+            return formatted_team;
         });
         return next();
     });

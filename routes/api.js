@@ -71,6 +71,34 @@ exports.set_odds = function(req, res) {
 	};
 };
 
+/* API - sets W/L record for all teams based on admin input */
+exports.set_records = function(req, res) {
+	var records = JSON.parse(req.body.records);
+	console.log("Records:: ",records);
+
+	db.Team.findAll().success(function(teams) {
+		var counter = Object.keys(records).length;
+		teams.forEach(function(team) {
+
+			console.log(records[team.id].wins, records[team.id])
+
+			if (team.id in records) {
+				team.updateAttributes({
+					wins: 	parseInt(records[team.id].wins),
+					losses: parseInt(records[team.id].losses)
+				}).success(function() {
+					console.log("Updated W/L for [",team.short_name,"] ",team.record());
+					if (--counter == 0)
+						return res.json({success: true})
+				}).error(function(err) {
+					console.error("ERROR - saving records from admin - ",err);
+					return res.json({success:false, error: "DB"})
+				});
+			}
+		});
+	});
+};
+
 /* API - signs a user in (logic handled by passport middleware) */
 exports.sign_in = function(req, res) {
 	return res.redirect("/lobby")

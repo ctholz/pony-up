@@ -115,14 +115,15 @@ exports.lobby = function(req, res) {
 
         leagues.forEach(function(league) {
 
-            league.getCommissioner().success(function(commissioner) {
+            league.getPlayers().success(function(players) {
             	/* there will be stub leagues in here if created in reverse, ignore them */
-            	if (commissioner)
+            	if (league.UserId)
+
 	                data.leagues.push({
 	                    id: league.id,
 	                    title: league.title,
 	                    password: league.password,
-	                    commissioner: commissioner.values
+	                    players: players.map(function(p) { return p.abbrName() }),
 	                });
 
                 if (--counter == 0)

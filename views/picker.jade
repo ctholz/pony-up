@@ -39,6 +39,11 @@ block content
 									.team-pick-with-logo-container(name="#{team.short_name}",data-division="#{division}",data-sub_division="#{sub_division}")
 										p.bolder &mdash; #{team.long_name} &mdash;
 										img(src='#{team.logo_path}')
+
+										if team.wins > 0 && team.losses > 0
+											.team-record Record: 
+												b=team.record
+
 										.display-odds(data-which="division") Win Division: #{team.division_odds_display} = 
 											if team.division_odds < 1
 												b #{team.division_odds.toFixed(2)} pts
