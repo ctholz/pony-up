@@ -95,6 +95,7 @@ block content
 
 		$(function() {
 			$("#winners-form").on("submit", submitOdds);
+			$("#odds-form").on("submit", submitOdds);
 			$("#records-form").on("submit", submitRecords);
 		});
 
@@ -140,13 +141,14 @@ block content
 
 			// Get params
 			var odds_by_team = {};
-			$(".odds-group").each(function() {
+			$("#odds-form").find(".odds-group").each(function() {
 				var team_id = $(this).data("tid");
 				odds_by_team[team_id] = {
 					wildcard_winner: is_winner(team_id, true),
 					division_winner: is_winner(team_id, false)
 				}
 				$(this).find('input').each(function() {
+					console.log($(this).find('input'), $(this).attr("name"));
 					odds_by_team[team_id][$(this).attr("name")] = $(this).val();
 				});
 			});
