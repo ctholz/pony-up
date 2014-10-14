@@ -46,28 +46,44 @@ html
 
         .container-fluid
             .navbar-header
-                button(type="button", class="navbar-toggle", data-toggle="collapse", data-target="#collapsable")
+                button(type="button", class="navbar-toggle", data-toggle="collapse", data-target="#navbar-collapse")
                     span.icon-bar
                     span.icon-bar
                     span.icon-bar
-                a.navbar-brand.white(href='/lobby') Pony Up
+                a.navbar-brand.white(href='/lobby') Pony Up Picks
 
                 .navbar-left
                     div NFL Season: Week #{WEEK_OF_SEASON}
 
-            if !user
-                form.navbar-form.navbar-right(role="sign-in", method="GET", action="/api/sign_in")
-                    - var error_klass = (error && error == "sign-in") ? "error-input" : ""
-                    div.form-group
-                        input(class="#{error_klass} form-control left" type="text", maxlength="40", name="email", placeholder="Email", required)
-                    div.form-group
-                        input(class="#{error_klass} form-control right" type="password", maxlength="40", name="password", placeholder="Password", style='width:100px;' required)
-                    button.flat-button.sign-in-button(type="submit") Sign In
-            else
-                .navbar-right
-                    h4.hidden-xs #{user.fullName()}
-                        a.logout(onclick="logout()" href="#") Logout
-                    a.visible-xs.pull-right.logout(onclick="logout()" href="#") Logout
+            #navbar-collapse.collapse.navbar-collapse
+                ul.nav.navbar-nav
+                    li
+                        a(href="/lobby") Lobby
+                    li
+                        - var klass = (in_picking_window) ? '' : 'disabled'
+                        button(
+                            href="/picker",
+                            class="#{klass} flat-button sign-in-button navbar-btn tooltipper",
+                            data-toggle="tooltip",
+                            data-container="body",
+                            title="The Pony Up picking window is open from Tuesday, 9am PST to Thursday, 12pm PST.", data-placement="bottom",
+                            onclick="window.location = '/picker';"
+                        ) Make Picks
+
+
+                if !user
+                    form.navbar-form.navbar-right(role="sign-in", method="GET", action="/api/sign_in")
+                        - var error_klass = (error && error == "sign-in") ? "error-input" : ""
+                        div.form-group
+                            input(class="#{error_klass} form-control left" type="text", maxlength="40", name="email", placeholder="Email", required)
+                        div.form-group
+                            input(class="#{error_klass} form-control right" type="password", maxlength="40", name="password", placeholder="Password", style='width:100px;' required)
+                        button.flat-button.sign-in-button(type="submit") Sign In
+                else
+                    .navbar-right
+                        h4.hidden-xs #{user.fullName()}
+                            a.logout(onclick="logout()" href="#") Logout
+                        a.visible-xs.pull-right.logout(onclick="logout()" href="#") Logout
 
     .container
         block content
@@ -76,6 +92,20 @@ html
 
         var WEEK_OF_SEASON = !{JSON.stringify(week_of_season)},
             WEEKS_REMAINING = !{JSON.stringify(WEEKS_REMAINING)};
+
+        $(function() {
+            $(".tooltipper").tooltip();
+            $(".popover").popover({
+                trigger: "hover",
+            });
+
+            /* Local Storage Test */
+            try {
+              localStorage.test = 2;     
+            } catch (e) {
+                alert("Pony Up is incompatible with private browsing, as we use cookies to store your session information. Please open Pony Up in regular browsing or use a different browser.");
+            }
+        })
 
         function logout() {
             localStorage.clear();

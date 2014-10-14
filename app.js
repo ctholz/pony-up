@@ -80,7 +80,7 @@ app.get('/', fetchBasics, fetchTeams, fetchOdds, function(req,res) {
         views.picker(req,res);
 });
 app.get('/picker', fetchBasics, fetchTeams, fetchOdds, views.picker);
-app.get('/lobby', fetchBasics, views.lobby);
+app.get('/lobby', fetchBasics, fetchTeams, views.lobby);
 app.get('/create', fetchBasics, views.create_league);
 app.get('/dashboard/:lid', ensureAuthenticated, fetchBasics, fetchTeams, fetchOdds, views.dashboard);
 app.get('/sign_up', newbOnly, fetchBasics, views.sign_up);
@@ -189,6 +189,7 @@ function newbOnly(req, res, next) {
         next();
 };
 
+/* Middleware - must be called before all views, include basic metadata for layout */
 function fetchBasics(req, res, next) {
     // Set defaults
     res.locals.week_of_season = CONSTANTS.WEEK_OF_SEASON;
@@ -199,6 +200,8 @@ function fetchBasics(req, res, next) {
     res.locals.my_weekly_picks = []
     res.locals.has_picked = false
     res.locals.user = null
+
+    res.locals.in_picking_window = helpers.inPickingWindow();
 
     if (req.user) {
         res.locals.user = req.user
@@ -242,17 +245,27 @@ function fetchOdds(req, res, next) {
         if (counter == 0) return next();
 
         res.locals.odds = [];
-        var this_week_odds = [];
+        var this_week_odds = [],
+            last_week_odds = [];
 
         odds.forEach(function(odds_obj) {
             if (odds_obj.week == CONSTANTS.WEEK_OF_SEASON)
                 this_week_odds.push(odds_obj.values);
+            else if (odds_obj.week == CONSTANTS.WEEK_OF_SEASON - 1)
+                last_week_odds.push(odds_obj.values);
             
             if (res.locals.odds[odds_obj.week]) res.locals.odds[odds_obj.week].push(odds_obj.values)
             else res.locals.odds[odds_obj.week] = [odds_obj.values];
 
             if (--counter == 0) {
-                res.locals.teams = helpers.appendOddsToTeams(res.locals.teams, this_week_odds);
+                // 
+                res.locals.odds_up_to_date = (this_week_odds.length > 0)
+                console.log(this_week_odds,last_week_odds)
+                // If this weeks odds not avail, give last weeks odds and set flag
+                if (res.locals.odds_up_to_date)
+                    res.locals.teams = helpers.appendOddsToTeams(res.locals.teams, this_week_odds);
+                else
+                    res.locals.teams = helpers.appendOddsToTeams(res.locals.teams, last_week_odds);
                 return next();
             }
         });

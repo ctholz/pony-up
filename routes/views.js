@@ -14,7 +14,6 @@ exports.dashboard = function(req, res) {
 			picks: 		   		[],
 			leaderboard: 		[],
 			pick_ordering: 		helpers.getPickOrdering(),
-			in_picking_window:  helpers.inPickingWindow()
 		};
 		
 	// Bounds checking
@@ -104,33 +103,56 @@ exports.lobby = function(req, res) {
 
     var data = {
         leagues: [],
-        errors: []
+        errors: [],
+        picks: [],
+        pick_ordering: 		helpers.getPickOrdering(),
     };
 
-    db.League.findAll({where:{status:'active'}}).success(function(leagues) {
-        var counter = leagues.length;
+    return getLeagues();
 
-        if (counter == 0)
-        	return res.render("lobby",data);
+    // Gets users picks for viewing in the lobby
+    function getUserPicks() {
+    	if (!req.user)
+    		return res.render("lobby", data);
 
-        leagues.forEach(function(league) {
+		db.Pick.findAll({where: { UserId: req.user.id }}).success(function(picks) {
+			
+			data.picks = helpers.formatPicksForView(res.locals.teams, picks.map(function(pick) {
+				return pick.values
+			}));
+			
+			return res.render("lobby", data);
+		});	
+    };
 
-            league.getPlayers().success(function(players) {
-            	/* there will be stub leagues in here if created in reverse, ignore them */
-            	if (league.UserId)
 
-	                data.leagues.push({
-	                    id: league.id,
-	                    title: league.title,
-	                    password: league.password,
-	                    players: players.map(function(p) { return p.abbrName() }),
-	                });
 
-                if (--counter == 0)
-                    res.render("lobby", data);
-            });
-        });
-    });
+	// Fetch active leagues for the lobby
+    function getLeagues() {
+	  	db.League.findAll({where:{status:'active'}}).success(function(leagues) {
+	        var counter = leagues.length;
+
+	        if (counter == 0)
+	        	return getUserPicks();
+
+	        leagues.forEach(function(league) {
+	            league.getPlayers().success(function(players) {
+	            	/* there will be stub leagues in here if created in reverse, ignore them */
+	            	if (league.UserId)
+
+		                data.leagues.push({
+		                    id: league.id,
+		                    title: league.title,
+		                    password: league.password,
+		                    players: players.map(function(p) { return p.abbrName() }),
+		                });
+
+	                if (--counter == 0)
+	                    return getUserPicks();
+	            });
+	        });
+	    });
+    };
 };
 
 /* VIEW - picker */
@@ -139,21 +161,39 @@ exports.picker = function(req,res) {
 	var data = {
 		lid: 	('lid' in req.query && !isNaN(parseInt(req.query.lid))) ? parseInt(req.query.lid) : -1
 	};
-
-	// TODO - ensure that the lid input actually pertains to one of your leagues
-
 	
 	if (req.user)
 		res.locals.user = req.user
 
-	console.log('foo - ',req.query)
-
 	if ('error' in req.query)
-		data['error'] = req.query.error
+		data.error = req.query.error
+
+	// Start
+	getPreviousPicks();
+
 
 	// Teams + Odds already added, just need to format by conference
-	data.teams = teamsByConference(res.locals.teams);
-	return res.render('picker',data);
+	function organizeTeams() {
+		data.teams = teamsByConference(res.locals.teams);
+		return res.render('picker',data);
+	}
+
+	// Get previous picks for highlighting if applicable
+	function getPreviousPicks() {
+		if (!req.user) {
+			data.previous_picks = null;
+			return organizeTeams();
+		}
+
+		// Get your most recent picks for team highlighting 
+		db.Pick.findAll({where: { week: [CONSTANTS.WEEK_OF_SEASON, CONSTANTS.WEEK_OF_SEASON - 1], UserId: req.user.id }}).success(function(picks) {
+
+			var most_recent_picks = picks.sort(function(a,b) { return b.week - a.week })[0].values;
+			data.previous_picks = helpers.formatPreviousPicks(res.locals.teams, most_recent_picks.picks)
+
+			return organizeTeams();
+		});
+	}
 };
 
 /* View -- admin */

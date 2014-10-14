@@ -23,44 +23,63 @@ block content
 				//- Only show the first division for now
 				- var klass = (i > 0) ? "hidden" : ""
 				.division-container(class="#{klass}")
-					h3 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
-					h4.guidance-text Step 1 of 4: Pick one winner of each division
-					div
-						span.highlight After your make your picks, you'll have the chance to join a League and create your account.
-					div
-						span.highlight If you're already a Pony Up Member, please sign in (in the navbar) before making your picks.
-					p#error-container.error
+
+					.row
+						.col-md-8
+							h3 Make your Week #{WEEK_OF_SEASON} picks for the #{division}
+							h4.guidance-text Step 1 of 4: Pick one winner of each division
+							div
+								span.highlight After your make your picks, you'll have the chance to join a League and create your account.
+							div
+								span.highlight
+									b If you're already a Pony Up Member, please sign in (in the navbar) before making your picks. 
+							p#error-container.error
+
+						.col-md-4
+							if !odds_up_to_date
+								.offset-container
+									.heading Note: 
+									.red Please note that you are viewing outdated odds. Odds for Week #{WEEK_OF_SEASON} will be set by Tuesday, 9am PST.
+
+
 
 					each sub_division in Object.keys(teams[division])
 						h3=sub_division
 						.row-fluid
 							each team in teams[division][sub_division]
 								.col-md-3.col-sm-6
-									.team-pick-with-logo-container(name="#{team.short_name}",data-division="#{division}",data-sub_division="#{sub_division}")
+									.team-pick-with-logo-container(
+											name="#{team.short_name}",
+											data-division="#{division}",
+											data-sub_division="#{sub_division}",
+											data-previous_division="(previous_picks) ? #{previous_picks.division_winners.indexOf(team.short_name) > -1 : 'false'}",
+											data-previous_wc="#{(previous_picks) ? previous_picks.wildcard_winners.indexOf(team.short_name) > -1 : 'false'}"
+										)
 										p.bolder &mdash; #{team.long_name} &mdash;
 										img(src='#{team.logo_path}')
 
-										if team.wins > 0 && team.losses > 0
+										if team.wins > 0 || team.losses > 0
 											.team-record Record: 
 												b=team.record
 
-										.display-odds(data-which="division") Win Division: #{team.division_odds_display} = 
-											if team.division_odds < 1
-												b #{team.division_odds.toFixed(2)} pts
-											else
-												b #{Math.round(team.division_odds)} pts
-										.display-odds.hidden(data-which="wildcard") Win Wildcard: #{team.wc_odds_display} = 
-											if team.wc_odds < 1
-												b #{team.wc_odds.toFixed(2)}
-											else
-												b #{Math.round(team.wc_odds)} pts
-										//-if team.wc_winner
-											.crest-container
-												.wc-winner-crest.crest(title="Currently holding a Wilcard spot.") WC
-										//-if team.division_winner
-											.crest-container
-												.division-winner-crest.crest(title="Currently leading the division.")
-													span.glyphicon.glyphicon-star
+										if team.odds_available
+											.display-odds(data-which="division") Win Division: #{team.division_odds_display} = 
+												if team.division_odds < 1
+													b #{team.division_odds.toFixed(2)} pts
+												else
+													b #{Math.round(team.division_odds)} pts
+											.display-odds.hidden(data-which="wildcard") Win Wildcard: #{team.wc_odds_display} = 
+												if team.wc_odds < 1
+													b #{team.wc_odds.toFixed(2)}
+												else
+													b #{Math.round(team.wc_odds)} pts
+											//-if team.wc_winner
+												.crest-container
+													.wc-winner-crest.crest(title="Currently holding a Wilcard spot.") WC
+											//-if team.division_winner
+												.crest-container
+													.division-winner-crest.crest(title="Currently leading the division.")
+														span.glyphicon.glyphicon-star
 
 
 			.button-container
@@ -71,7 +90,9 @@ block content
 	script(type="text/javascript").
 		var teams = 	!{JSON.stringify(teams)},
 			user = 		!{JSON.stringify(user)},
-			lid = 		!{JSON.stringify(lid)};
+			lid = 		!{JSON.stringify(lid)},
+			in_picking_window = !{JSON.stringify(in_picking_window)},
+			odds_up_to_date = !{JSON.stringify(odds_up_to_date)};
 
 
 

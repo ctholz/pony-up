@@ -38,6 +38,10 @@ a {
 	text-align: center !important;
 }
 
+.inline { 
+	display: inline-block;
+}
+
 .bold {
 	font-weight: bold;
 }
@@ -69,6 +73,10 @@ a {
 	max-width: 100px;
 }
 
+.team-pick-with-logo-container.previous-pick {
+	border: 2px solid #f4f4f4;
+}
+
 .team-pick-with-logo-container:hover {
 	border: 1px solid #666
 }
@@ -80,6 +88,8 @@ a {
 .team-pick-with-logo-container.picked-wildcard {
 	border-color: #F7CA18;
 }
+
+
 
 .crest-container {
 	position: relative;
@@ -196,6 +206,10 @@ a.flat-button:hover {
 	background-color: #D64541;
 }
 
+.green-button {
+	background-color:  #26A65B;
+}
+
 .green {
 	color: #26A65B;
 }
@@ -221,6 +235,7 @@ a.flat-button:hover {
 	font-size: 10pt;
 	margin-left: 24px;
 	font-weight: normal;
+	padding: 15px;
 }
 
 .navbar-colored {
@@ -231,6 +246,17 @@ a.flat-button:hover {
 
 .navbar-left {
 	padding: 15px;
+	margin-right: 30px;
+}
+
+#navbar-collapse .navbar-nav > li > a {
+	color: white;
+	text-shadow: none;
+	padding: 15px;
+}
+
+span.icon-bar {
+	background-color: white !important;
 }
 
 .navbar-form input {
@@ -292,16 +318,29 @@ a.flat-button:hover {
 	margin-right: 10px;
 }
 
+.offset-container {
+	background-color: #f4f4f4;
+	border: 1px solid #c2c2c2;
+	border-radius: 2px;
+	padding: 10px 20px;
+}
 
+.offset-container .heading {
+	font-weight: bold;
+	font-size: 16px;
+	margin-bottom: 5px;
+}
 
-
-
+.row-fluid.bordered {
+	border-top: 1px solid #c2c2c2;
+	border-bottom: 1px solid #c2c2c2;
+}
 
 
 
 @media screen and (max-width: 480px) { 
 	body { padding: 0 !important; }
-
+	.navbar .nav { float: none !important; }
 }
 
 @media(max-width:767px) {

@@ -4,16 +4,53 @@ extends layout
 block content
 
 	.col-md-10.col-md-offset-1
-		h1 Welcome to the Lobby
+		h1 The Lobby
+		
+		if user
+			.row-fluid.bordered 
+				.col-md-12
+					h3 Your Picks:
+						button.flat-button.pull-right(name='toggle-picks', style="margin-top:10px;") Show All Weeks
+
+					table#my-picks-table.picks-table.table.table-bordered.table-open(data-pid="#{user.id}")
+						th Week
+						each heading, i in pick_ordering
+							th=heading
+
+						tbody
+							each pick, i in picks
+								- var klass = (i == picks.length - 1) ? 'this-week-picks' : 'hidden'
+								tr(class="#{klass} weekly-picks-container" data-week="#{pick.week}")
+									td=pick.week
+
+									each team, j in pick.formatted_picks
+										td(title="#{team.name}")
+											img.dashboard-team-thumbnail.team-logo-hover(src="#{team.logo_path}")
+
+							- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] + 1 : WEEK_OF_SEASON;
+							- for (var j = start_week; j <= 17; j++) { 
+								tr.hidden.weekly-picks-container
+									td #{j}
+
+									if in_picking_window && j == picks.length + 1 && picks.length < WEEK_OF_SEASON
+										td.align-center.bold(colspan="#{pick_ordering.length}")
+											a(href='/picker?lid=#{lid}') Make your picks for next week!
+									else
+										- for (var k = 0; k < pick_ordering.length; k++) {
+											td 
+										- }
+							- }
+
+
+
+		h3 Active Leagues
+		p Join a league from the list below (some will require a password), or 
+			a.flat-button(href="/create") Create a Game
 
 		if !user
 			p
 				span.highlight Almost there! If you're already a Pony Up member, sign in at the top right. 
 
-		p Join a league from the list below (some will require a password), or 
-			a.flat-button(href="/create") Create a Game
-
-		h3 Active Leagues
 		if leagues.length == 0
 			p No active leagues at the moment...
 		table#lobby-table.table.table-hover
@@ -45,9 +82,13 @@ block content
 		var my_leagues = !{JSON.stringify(my_leagues)},
 			my_weekly_picks = !{JSON.stringify(my_weekly_picks)},
 			has_picked = !{JSON.stringify(has_picked)},
-			leagues = !{JSON.stringify(leagues)};
+			leagues = !{JSON.stringify(leagues)},
+			picks = !{JSON.stringify(picks)},
+			teams = !{JSON.stringify(teams)};
 
-		var user = !{JSON.stringify(user)}
+		var user = !{JSON.stringify(user)};
+
+		var picks_expanded = false;
 
 		$(function() {
 			// 
@@ -62,9 +103,23 @@ block content
 				}
 			});
 
+			$("button[name='toggle-picks']").on("click", togglePicks);
+
 			// TODO: what if user gets here without making selections??
 
 		});
+
+		function togglePicks(e) {
+			
+			$("#my-picks-table").find("tr.weekly-picks-container").not(".this-week-picks").toggleClass("hidden")
+			
+			if (picks_expanded)
+				$(this).text("Show All Weeks")
+			else
+				$(this).text("Hide All Week")
+			
+			picks_expanded = !picks_expanded;
+		};
 
 		// Handler - button click
 		function openJoin(e) {

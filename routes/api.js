@@ -12,19 +12,32 @@ exports.test = function(req,res) {
 	});
 };
 
+
 exports.set_picks = function(req, res) {
 
 	var picks = req.body.selections,
 		week = req.body.week,
 		lid = req.body.lid;
 
-	createPicks(picks, req.user, week, lid, function(err, picks) {
+	var callback = function(err, picks) {
 		if (err) {
 			console.error("___ERROR___: createPicks callback - ",err);
 			return res.json({success: false});
 		} else {
 			console.log("___SUCCESS___: picks set - ",picks.values);
 			return res.json({success: true });
+		}
+	};
+
+	// If existing pick, destroy it, otherwise create new
+	db.Pick.find({where: { week: CONSTANTS.WEEK_OF_SEASON, UserId: req.user.id }}).success(function(pick) {
+		if (pick) {
+			pick.destroy().success(function() {
+				console.log("Destroyed old picks for [",req.user.fullName(),"] Week: ",CONSTANTS.WEEK_OF_SEASON);
+				createPicks(picks, req.user, week, lid, callback);
+			});
+		} else {
+			createPicks(picks, req.user, week, lid, callback);
 		}
 	});
 };

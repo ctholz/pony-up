@@ -14,6 +14,8 @@ $(function() {
 	$(".team-pick-with-logo-container").on("click",togglePick);
 	$("button[name='next']").on("click", submitDivisionPicks);
 
+	$(".team-pick-with-logo-container[data-previous_division='true']").addClass("previous-pick");
+
 });
 
 
@@ -85,6 +87,10 @@ function submitDivisionPicks(e) {
 		$(".display-odds").toggleClass("hidden");
 
 		$scope.in_wildcard_selection = true;
+
+		$(".previous-pick").removeClass("previous-pick")
+		$(".team-pick-with-logo-container[data-previous_wc='true']").addClass("previous-pick");
+
 		selectWildcards(e);
 
 	} else if ($scope.step == 5) {
@@ -94,6 +100,10 @@ function submitDivisionPicks(e) {
  		$(".display-odds").toggleClass("hidden");
 
 		$scope.in_wildcard_selection = false;
+
+		$(".previous-pick").removeClass("previous-pick")
+		$(".team-pick-with-logo-container[data-previous_division='true']").addClass("previous-pick");
+
 
 		var $next = $(".division-container.hidden:first");
 

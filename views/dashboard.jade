@@ -26,15 +26,15 @@ block content
 
 				tbody
 					each pick, i in picks
-						tr
+						tr.weekly-picks-container(data-week="#{pick.week}")
 							td=pick.week
 
 							each team, j in pick.formatted_picks
 								td(title="#{team.name}")
-									img.dashboard-team-thumbnail(src="#{team.logo_path}")
+									img.dashboard-team-thumbnail.team-logo-hover(src="#{team.logo_path}")
 
-					- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] + 1 : WEEK_OF_SEASON;
-					- for (var j = start_week; j <= 17; j++) { 
+					//- var start_week = (picks.length > 0) ? picks[picks.length - 1]['week'] + 1 : WEEK_OF_SEASON;
+					//- for (var j = start_week; j <= 17; j++) { 
 						tr
 							td #{j}
 
@@ -45,7 +45,7 @@ block content
 								- for (var k = 0; k < pick_ordering.length; k++) {
 									td 
 								- }
-					- }
+					//- }
 
 			each p, i in players
 				if p.id != user.id
@@ -54,6 +54,10 @@ block content
 						each heading, i in pick_ordering
 							th=heading
 						tbody
+							if p.picks.length == 0
+								tr
+									td.align-center(colspan="12") #{p.first_name} hasn't made any picks yet.
+
 							each pick, i in p.picks
 								tr
 									td=pick.week
@@ -63,7 +67,7 @@ block content
 
 
 		.col-md-4
-			table#players-table.table.table-bordered
+			table#players-table.table.table-bordered.table-hover
 				th
 				th Player
 				th.tooltipper(data-toggle='tooltip', title='If the season ended today') Points*
@@ -82,13 +86,13 @@ block content
 
 			h5.align-center Invite players to join your league using the information below!
 			.row
-				.col-md-6.col-md-offset-3
-					p League Title: #{league.title}
-					if league.password
-						p League Password: #{league.password}
-					else
-						p (No password)
-
+				.col-md-8.col-md-offset-2.offset-container
+					p 
+						b League Title: 
+						| #{league.title}
+					p
+						b Leage Password: 
+						| #{league.password || '(n/a)'}
 
 
 	script(type="text/javascript", src="/javascripts/dashboard.js")

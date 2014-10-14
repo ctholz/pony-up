@@ -44,7 +44,7 @@ exports.formatPicksForDB = function(teams,picks) {
 	picks.forEach(function(pick) {
 		var key = pick.slice(0, pick.lastIndexOf('-')).toUpperCase(),
 			index = DB_PICK_ORDERING.indexOf(key);
-		console.log(key,':: ',index)
+		//console.log(key,':: ',index)
 		arr[index] = idForTeamName(pick.slice(pick.lastIndexOf('-') + 1));
 	});
 	return arr;
@@ -71,7 +71,7 @@ exports.formatOddsForDB = function(odds) {
 		for (var i = 0; i < val.length; i++)
 			arr[index + i] = val[i];
 	};
-	console.log("Odds:: ",odds, " | Value:: ",arr);
+	//console.log("Odds:: ",odds, " | Value:: ",arr);
 	return arr;
 };
 
@@ -79,8 +79,23 @@ exports.getPickOrdering = function() {
 	return DB_PICK_ORDERING;
 };
 
-exports.formatPicksForView = function(teams, picks) {
+// Input: teams, picks
+	// Output: dict with array of division winners and array of wildcard winners
+exports.formatPreviousPicks = function(teams, picks) {
+	var previous_picks = { division_winners: [], wildcard_winners: [] },
+		formatted_picks = exports.teamShortNameForIds(teams, picks);
 
+	for (var i = 0; i < picks.length; i++) {
+		if (DB_PICK_ORDERING[i].indexOf("WC") == -1)
+			previous_picks.division_winners.push(formatted_picks[i]);
+		else
+			previous_picks.wildcard_winners.push(formatted_picks[i]);
+	};
+
+	return previous_picks;
+};
+
+exports.formatPicksForView = function(teams, picks) {
 	function teamNameForId(id) {
 		return (_.find(teams, function(team) { return team.id == parseInt(id) })).short_name;
 	};
@@ -100,12 +115,21 @@ exports.formatPicksForView = function(teams, picks) {
 	});
 };
 
-
-
-
-exports.formatOddsForView = function(teams,odds) {
-	return 'foo'
+// Input: array of teams, array of teamIds
+	// Output: array of team short names
+exports.teamShortNameForIds = function(teams, team_ids) {
+	function teamNameForId(id) {
+		return (_.find(teams, function(team) { return team.id == parseInt(id) })).short_name;
+	};
+	return team_ids.map(function(team_id) {
+		return teamNameForId(team_id);
+	});
 };
+
+
+// exports.formatOddsForView = function(teams,odds) {
+// 	return 'foo'
+// };
 
 // Public API (Wrapper)
 exports.getLogoPathForTeamName = function(short_name) {
@@ -149,16 +173,25 @@ exports.appendOddsToTeams = function(teams, odds) {
 	// TODO - case in which odds are empty
 	// 
 	teams.forEach(function(team) {
-		var team_odds = odds_dict[team.id];
-		team["division_odds_display"] = String(team_odds.odds[2]) + "/" + String(team_odds.odds[3]);
-		team["division_odds"] = team_odds.odds[2] / team_odds.odds[3];
-		team["wc_odds_display"] = String(team_odds.odds[0]) + "/" + String(team_odds.odds[1]);
-		team["wc_odds"] = team_odds.odds[0] / team_odds.odds[1];
 
-		team["wc_winner"] = Boolean(team_odds.odds[4]);
+		if (team.id in odds_dict) {
+			var team_odds = odds_dict[team.id];
+			team.division_odds_display = String(team_odds.odds[2]) + "/" + String(team_odds.odds[3]);
+			team.division_odds = team_odds.odds[2] / team_odds.odds[3];
+			team.wc_odds_display = String(team_odds.odds[0]) + "/" + String(team_odds.odds[1]);
+			team.wc_odds = team_odds.odds[0] / team_odds.odds[1];
+			team.wc_winner = Boolean(team_odds.odds[4]);
+			team.division_winner = Boolean(team_odds.odds[5]);
+
+		} else {
+			team.division_odds_display = team.division_odds = team.wc_odds_display = team.wc_odds = team.wc_winner = team.division_winner = null;
+		}
+
+		// used to toggle display when no odds avail
+		team.odds_available = (team.id in odds_dict);
+
 		if (team.wc_winner)
 			console.log("WC: ",team.wc_winner, "team:: ",team)
-		team["division_winner"] = Boolean(team_odds.odds[5]);
 	});
 
 	return teams;
@@ -187,8 +220,11 @@ exports.getProjectedPoints = function(picks, odds, teams) {
 	var conferenceKeysForTeams = mapTeamsToConferenceKeys(teams);
 
 	picks.forEach(function(pick_set) {
+
+		// If no odds for this week, default to last week
+		var odds_set = (odds[pick_set.week]) ? odds[pick_set.week] : odds[pick_set.week - 1]
 		// Augment odds with conference keys
-		var odds_with_conference_keys = appendConferenceKeyToOdds(odds[pick_set.week], conferenceKeysForTeams);
+		var odds_with_conference_keys = appendConferenceKeyToOdds(odds_set, conferenceKeysForTeams);
 		// Get sorted division winners with points
 		var division_winners = getWinnersByDivision(odds_with_conference_keys);
 		// Tally winners against your picks
