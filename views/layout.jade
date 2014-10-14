@@ -59,6 +59,8 @@ html
                 ul.nav.navbar-nav
                     li
                         a(href="/lobby") Lobby
+                    li(style='margin-right:8px;')
+                        a(href="/faq") FAQ
                     li
                         - var klass = (in_picking_window) ? '' : 'disabled'
                         button(
@@ -87,6 +89,7 @@ html
 
     .container
         block content
+
 
     script(type="text/javascript").
 

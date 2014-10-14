@@ -85,6 +85,7 @@ app.get('/create', fetchBasics, views.create_league);
 app.get('/dashboard/:lid', ensureAuthenticated, fetchBasics, fetchTeams, fetchOdds, views.dashboard);
 app.get('/sign_up', newbOnly, fetchBasics, views.sign_up);
 app.get('/admin/:pw', fetchBasics, passwordProtected, views.admin);
+app.get('/faq', fetchBasics, views.faq);
 
 app.get('/logout', views.logout);
 
@@ -207,7 +208,6 @@ function fetchBasics(req, res, next) {
         res.locals.user = req.user
 
         req.user.getLeagues().success(function(leagues) {
-            console.log('FETCHING:: ',leagues)
             res.locals.my_leagues = leagues || [];
 
             db.Pick.find({where: {status: "active", week: CONSTANTS.WEEK_OF_SEASON, UserId: req.user.id}}).success(function(picks) {

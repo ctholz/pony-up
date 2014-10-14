@@ -70,6 +70,11 @@ exports.create_league = function(req,res) {
 	return res.render("create_league", {});
 };
 
+/* View - FAQ */
+exports.faq = function(req, res) {
+	return res.render("faq", {faqs: CONSTANTS.FAQS})
+};
+
 /* Psuedo-view - Log out and redirect to welcome */
 exports.logout = function(req, res) {
 	req.logout();
