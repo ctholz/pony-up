@@ -52,7 +52,7 @@ block content
 											name="#{team.short_name}",
 											data-division="#{division}",
 											data-sub_division="#{sub_division}",
-											data-previous_division="(previous_picks) ? #{previous_picks.division_winners.indexOf(team.short_name) > -1 : 'false'}",
+											data-previous_division="#{(previous_picks) ? previous_picks.division_winners.indexOf(team.short_name) > -1 : 'false'}",
 											data-previous_wc="#{(previous_picks) ? previous_picks.wildcard_winners.indexOf(team.short_name) > -1 : 'false'}"
 										)
 										p.bolder &mdash; #{team.long_name} &mdash;
@@ -93,6 +93,8 @@ block content
 			lid = 		!{JSON.stringify(lid)},
 			in_picking_window = !{JSON.stringify(in_picking_window)},
 			odds_up_to_date = !{JSON.stringify(odds_up_to_date)};
+
+		var previous_picks = !{JSON.stringify(previous_picks)}
 
 
 
