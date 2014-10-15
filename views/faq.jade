@@ -1,0 +1,11 @@
+extends layout
+
+
+block content
+
+	.col-md-10.col-md-offset-1
+		h1 Frequently Asked Questions
+		br
+		each faq in faqs
+			h5 Q: #{faq.q}
+			p  A: #{faq.a}
