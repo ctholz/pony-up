@@ -111,9 +111,71 @@ exports.lobby = function(req, res) {
         errors: [],
         picks: [],
         pick_ordering: 		helpers.getPickOrdering(),
+        made_weekly_bets: false
     };
 
     return getLeagues();
+
+
+    function checkIfWeeklyBetsMade() {
+    	if (!req.user) {
+    		data.made_weekly_bets = true;
+    		return res.render("lobby", data);
+    	}
+
+    	var bet_key = "week_" + CONSTANTS.WEEK_OF_SEASON + "_team_bets";
+    	db.client.smembers(bet_key, function(err,reply) {
+
+    		var counter = reply.length;
+    		reply.forEach(function(bet_id) {
+    			db.client.hget("bet:" + bet_id, "userId", function(err,reply) {
+    				if (parseInt(reply) == req.user.id)
+    					data.made_weekly_bets = true;
+
+    				if (--counter == 0)
+    					return res.render("lobby", data);
+    			});
+    		});
+
+    		if (counter == 0)
+    			return res.render("lobby", data);
+    	});
+    };
+
+    function getWeeklyMatches() {
+
+    	console.log("\n\nFetching weekly matches...\n\n")
+
+    	function _error() {
+    		data.matches = [];
+    		return res.render("lobby", data);
+    	}
+
+	    //	res.render("lobby", data);
+	    db.client.smembers("week_" + CONSTANTS.WEEK_OF_SEASON + "_team_matches", function(err,reply) {
+	    	data.matches = [];
+	    	var match_ids = reply,
+	    		counter = match_ids.length;
+
+	    	match_ids.forEach(function(mid) {
+	    		db.client.hgetall("match:" + mid, function(err,reply) {
+	    			if (err) return _error();
+
+	    			data.matches.push(reply);
+
+	    			if (--counter == 0) {
+	    				data.matches = helpers.formatMatchesForView(res.locals.teams, data.matches);
+	    				console.log("D:: ",data.matches)
+	    				return checkIfWeeklyBetsMade();
+	    			}
+	    		})
+	    	});
+
+	    	if (counter == 0)
+	    		return checkIfWeeklyBetsMade();
+	    });
+    };
+
 
     // Gets users picks for viewing in the lobby
     function getUserPicks() {
@@ -126,10 +188,9 @@ exports.lobby = function(req, res) {
 				return pick.values
 			}));
 			
-			return res.render("lobby", data);
+			return getWeeklyMatches();
 		});	
     };
-
 
 
 	// Fetch active leagues for the lobby

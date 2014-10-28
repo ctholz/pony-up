@@ -12,6 +12,7 @@ block content
 			button.flat-button(onclick="toggleContainer('winners-container')") Enter Division Leaders
 			button.flat-button.red-button(onclick="debug()") Debug
 			button.flat-button(onclick="toggleContainer('win-loss-container')") Enter W/L Records
+			button.flat-button(onclick="toggleContainer('matches-container')") Enter Matches
 			button.flat-button(onclick="toggleContainer('stats-container')") Show Stats
 
 
@@ -86,6 +87,32 @@ block content
 
 				button.flat-button(type="submit") Submit
 
+	.row.matches-container.page-container.hidden
+		.col-md-10.col-md-offset-1
+			h1 Enter This Week's Matches
+
+			form#matches-form.form
+
+				- for (var i = 0; i < 16; i++) {
+					.match-input-container(data-which="#{i + 1}") #{i + 1}. 
+						select(required)
+							option
+							each t,i in teams
+								option(value='#{t.id}')=t.short_name
+						input.form-control-override.input-inline-small(type="number", min="0", max="100", required, placeholder="points")
+
+						span  vs. 
+						select(required)
+							option
+							each t,i in teams
+								option(value='#{t.id}')=t.short_name
+						input.form-control-override.input-inline-small(type="number", min="0", max="100", required, placeholder="points")
+
+				- }
+
+				button.flat-button(type="submit") Submit
+
+
 
 
 
@@ -97,13 +124,26 @@ block content
 			$("#winners-form").on("submit", submitOdds);
 			$("#odds-form").on("submit", submitOdds);
 			$("#records-form").on("submit", submitRecords);
+			$("#matches-form").on("submit", submitMatches);
+
+			$(".match-input-container select").on("change", updateMatchSelectOptions)
 		});
 
+		// Toggles which container is visible
 		function toggleContainer(which) {
 			$(".page-container").addClass("hidden");
 			$("." + which).removeClass("hidden");
 		};
 
+		// Generic API callback helper
+		function apiCallback(res) {
+			if (res.success)
+				$(".success-container").text('Success!')
+			else
+				$(".error-container").text("Error:: ",res.error);
+		}
+
+		// Pre-fills all the forms with dummy data
 		function debug() {
 			var odds_sample = ["11/5","3/1","12/1","13/1","14/1","18/1","18/1","25/1","28/1","30/1","32/1","40/1","45/1","60/1","100/1","125/1"];
 
@@ -113,7 +153,11 @@ block content
 
 			function rand_win_loss() {
 				return Math.round(Math.random() * 16)
-			}
+			};
+
+			function rand_match_point_cost() {
+				return Math.round(Math.random() * 30)
+			};
 
 			$(".odds-container").find("input").each(function() {
 				$(this).val(rand_sample());
@@ -122,6 +166,32 @@ block content
 			$(".win-loss-container").find("input").each(function() {
 				$(this).val(rand_win_loss())
 			});
+
+			// -- Debug for Matches  -- //
+
+			// Get team ids for matches
+			var team_ids = _.pluck(teams, 'id');
+
+			// Shuffle them for random matches
+			team_ids = _.shuffle(team_ids);
+
+			var $container = $("#matches-form")
+			for (var i = 1; i <= team_ids.length; i+=2) {
+
+				var match_num = (i + 1) / 2,
+					$match_container = $container.find(".match-input-container[data-which='" + match_num + "']"),
+					counter = 0;
+
+				// In each match container, select option with randomized team id
+				$match_container.find("select").each(function() {
+					$(this).find("option[value='" + (team_ids[i - counter++]) + "']").attr("selected", true);
+				});
+
+				// In each match container, add random point cost for team selection
+				$match_container.find("input").each(function() {
+					$(this).val(rand_match_point_cost());
+				});
+			};	
 		};
 
 		function submitOdds(e) {
@@ -137,7 +207,6 @@ block content
 
 			if (!valid)
 				return $(".error-container").text("Missing some odds, can't submit");
-
 
 			// Get params
 			var odds_by_team = {};
@@ -160,13 +229,7 @@ block content
 
 			console.log("Odds - ",odds_by_team)
 
-			$.post("/api/set_odds", { odds: JSON.stringify(odds_by_team) }, function(res) {
-				if (res.success)
-					$(".success-container").text('Success!')
-				else
-					$(".error-container").text("Error:: ",res.error);
-			},'json');
-
+			$.post("/api/set_odds", { odds: JSON.stringify(odds_by_team) }, apiCallback,'json');
 		};
 
 		function submitRecords(e) {
@@ -184,12 +247,50 @@ block content
 
 			console.log("D:: ",data)
 
-			$.post("/api/set_records", { records: JSON.stringify(data) }, function(res) {
-				if (res.success)
-					$(".success-container").text("Success!");
-				else
-					$(".error-container").text("Error:: ",res.error);
-			}, "json");	
+			$.post("/api/set_records", { records: JSON.stringify(data) }, apiCallback, "json");	
+		};
+
+
+		function submitMatches(e) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			var data = {},
+				matches = [];
+
+			function getTeamIds($container) {
+				return $container.find("select").map(function() {
+					return parseInt($(this).find(":selected").val());
+				}).slice(0,2)
+			};
+
+			function getPointCosts($container) {
+				return $container.find("input").map(function() {
+					return parseInt($(this).val())
+				}).slice(0,2)
+			};
+
+			$("#matches-form").find(".match-input-container").each(function() {
+				var team_ids = [],
+					point_costs = [];
+				//$(this)
+				matches.push(_.zip(getTeamIds($(this)), getPointCosts($(this))))
+			});
+
+			console.log("Matches:: ",matches);
+			data.matches = JSON.stringify(matches);
+
+			$.post("/api/set_matches", data, apiCallback, "json");
+		};
+
+		function updateMatchSelectOptions(e) {
+			var team_id = $(this).val();
+
+			$(this).find("option:selected").addClass("marked");
+
+			$("#matches-form").find("option[value='" + team_id + "']").each(function() {
+				if (!$(this).hasClass("marked")) $(this).remove();
+			});
 		};
 
 

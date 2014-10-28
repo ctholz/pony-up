@@ -97,6 +97,8 @@ app.post('/api/join_league', api.join_league);
 app.post('/api/set_picks', api.set_picks);
 app.post('/api/set_odds', fetchTeams, api.set_odds);
 app.post('/api/set_records', api.set_records);
+app.post('/api/set_matches', api.set_matches);
+app.post('/api/set_match_bets', api.set_match_bets);
 
 // DEV DEV DEV //
 app.get('/test', api.test);

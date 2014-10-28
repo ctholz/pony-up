@@ -267,6 +267,161 @@ exports.join_league = function(req, res) {
 	});
 };
 
+// API - creates match objects (all Redis)
+exports.set_matches = function(req, res) {
+	var matches = JSON.parse(req.body.matches),
+		new_match_ids = [],
+		week_key = "week_" + CONSTANTS.WEEK_OF_SEASON + "_team_matches";
+	
+	console.log("Adding Matches for [", week_key,"]::",matches);
+
+	// Go
+	clear_old_state();
+
+	function _error(msg) {
+		return res.json({success: false, error: msg});
+	};
+
+	// 1. Delete any existing matches for this week if they exist
+	function clear_old_state() {
+		// Clear any existing matches
+		db.client.del(week_key, function(err,reply) {
+			if (err) return _error(err);
+			return create_this_weeks_matches();
+		});
+	};
+
+	// 2. Delete to helper to create all matches 
+	function create_this_weeks_matches() {
+
+		var counter = matches.length;
+		matches.forEach(function(match) {
+			db.client.incr("match_counter", function(err,reply) {
+				if (err) return _error(err);
+
+				create_single_match(parseInt(reply), match[0], match[1], function(err) {
+					if (err) return _error(err);
+
+					if (--counter == 0) {
+						return append_match_ids_to_set()
+					}
+				});
+			});
+		});
+	};
+
+	// 3. Append all match ids to week list
+	function append_match_ids_to_set() {
+		db.client.sadd(week_key, new_match_ids, function(err,reply) {
+			if (err) return _error(err);
+
+			return res.json({success: true});
+		});	
+	};
+
+	// Gets the ID needed
+	function create_single_match(match_id, team_1, team_2, callback) {
+
+		// Append ID to list
+		new_match_ids.push(parseInt(match_id))
+
+		// Create match obj
+		var match = {
+			id: 			match_id,
+			team1Id: 		team_1[0],
+			team2Id: 		team_2[0],
+			team1Points: 	team_1[1],
+			team2Points: 	team_2[1],
+			status: 		"pending",
+			winnerId: 		null,
+			week: 			CONSTANTS.WEEK_OF_SEASON
+		};
+
+		db.client.hmset("match:" + match_id, match, function(err,reply) {
+			if (err) return _error();
+			else console.log("Match Created: ",reply);
+
+			callback();
+		});
+	};
+};
+
+
+exports.set_match_bets = function(req,res) {
+
+	// Each bet takes the form of [match_id, team_id, points]
+	var bets = JSON.parse(req.body.matches),
+		new_bet_ids = [],
+		week_key = "week_" + CONSTANTS.WEEK_OF_SEASON + "_team_bets";
+	
+	if (!req.user)
+		return res.json({success: false, error: "You must be signed in to place side-bets."});
+
+	// Go
+	create_this_weeks_bets();
+
+	function _error(msg) {
+		return res.json({success: false, error: msg});
+	};
+
+	// 1. Delegate to helper to create bets
+	function create_this_weeks_bets() {
+
+		var counter = bets.length;
+		bets.forEach(function(bet) {
+			db.client.incr("bet_counter", function(err,reply) {
+				if (err) return _error(err);
+
+				create_single_bet(parseInt(reply), bet, req.user.id, function(err) {
+					if (err) return _error(err);
+
+					if (--counter == 0) {
+						return append_bet_ids_to_set()
+					}
+				});
+			});
+		});
+	};
+
+	// 3. Append all match ids to week list
+	function append_bet_ids_to_set() {
+		db.client.sadd(week_key, new_bet_ids, function(err,reply) {
+			if (err) return _error(err);
+
+			return res.json({success: true});
+		});	
+	};
+
+	// Gets the ID needed
+	function create_single_bet(bet_id, bet_data, user_id, callback) {
+
+		// Append ID to list
+		new_bet_ids.push(parseInt(bet_id))
+
+		// Create match obj
+		var bet = {
+			id: 			bet_id,
+			userId: 		user_id,
+			matchId: 		bet_data[0],
+			teamId: 		bet_data[1],
+			points: 		bet_data[2],
+			week: 			CONSTANTS.WEEK_OF_SEASON,
+			status: 		'pending'
+		};
+
+		db.client.hmset("bet:" + bet_id, bet, function(err,reply) {
+			if (err) return _error();
+			else console.log("Bet Created: ",bet);
+
+			callback();
+		});
+	};
+};
+
+
+/* --------------------------- */
+/* ---   PRIVATE HELPERS   --- */
+/* --------------------------- */
 
 /* Inner Helper - create and join a league that is already stubbed */
 function createAndJoinLeague(user, lid, callback) {

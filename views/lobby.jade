@@ -5,6 +5,9 @@ block content
 
 	.col-md-10.col-md-offset-1
 		h1 The Lobby
+			- var disabled = (made_weekly_bets)
+			- var klass = (made_weekly_bets || !user) ? 'disabled' : ''
+			button.tooltipper(class="#{klass} flat-button pull-right" name="match-betting-button", data-toggle="tooltip", title="Play our new mini-game. Pick the winners of this week's matches with a limited point system. Best record wins. (Note: you must be logged in to play)", data-placement="bottom") New! Wager on Weekly Matches
 		
 		if user
 			.row-fluid.bordered 
@@ -74,6 +77,45 @@ block content
 									i.fa.fa-unlock
 
 
+		#match-picker-modal.modal.fade(tabindex="-1", role="dialog", aria-hidden="true", style="width: 600px;")
+			.modal-dialog(style="margin: 0 auto;")
+				.modal-content
+					.modal-header
+						button.close(type="button", data-dismiss="modal")
+							span(aria-hidden="true") &times;
+							span.sr-only Close
+						h4.modal-title Welcome to the Pony Up Weekly Mini-Challenge
+					.modal-body(style="max-height: 1000px;")
+						.error-container.error.align-center
+
+						p
+							b Rules: 
+							| You're given 100 "points" to pick the most winners per week. 
+							| Each pick has a point cost - obvious favorites cost a lot! Make
+							| the wisest use of your 100 points and win the game.
+
+						h1#points-remaining.align-center 100
+						h5.align-center points remaining
+
+						if matches
+							each match, i in matches
+								.row-fluid.total-match-container
+									.col-sm-5.single-match-container(data-mid="#{match.id}", data-tid="#{match.team1Id}", data-cost="#{match.team1Points}")
+										.align-center
+											div
+												b #{match.team1Points} pts.
+											img(src="#{match.team1LogoPath}", alt="#{match.team1Name}", style="width:75px; height: auto; max-width: 100%;")
+											div Record: #{match.team1Record}
+									.col-sm-2.align-center vs.
+									.col-sm-5.single-match-container(data-mid="#{match.id}", data-tid="#{match.team2Id}", data-cost="#{match.team2Points}")
+										.align-center
+											div
+												b #{match.team2Points} pts.
+											img(src="#{match.team2LogoPath}", alt="#{match.team2Name}", style="width:75px; height: auto; max-width: 100%;")
+											div Record: #{match.team2Record}
+					.modal-footer
+							button.flat-button(type="submit") Done
+						
 
 	script(type="text/javascript").
 		var selections = localStorage.getItem("selections");
@@ -91,6 +133,8 @@ block content
 		var picks_expanded = false;
 
 		$(function() {
+
+			$(".tooltipper").tooltip()
 			// 
 			updateButtons();
 			// 
@@ -105,9 +149,86 @@ block content
 
 			$("button[name='toggle-picks']").on("click", togglePicks);
 
-			// TODO: what if user gets here without making selections??
+			$(".single-match-container").on("click", toggleMatchSelection);
+			$("#match-picker-modal").find("button[type='submit']").on('click', submitMatches);
 
+			$("button[name='match-betting-button']").on("click", launchModal);
 		});
+
+		function launchModal(e) {
+			if (!$(this).hasClass("disabled"))
+				$("#match-picker-modal").modal()
+		};
+
+		function toggleMatchSelection(e) {
+			var $points_container = $("#points-remaining"),
+				current_num_points = parseInt($points_container.text()),
+				cost = parseInt($(this).data("cost"));
+
+			// Clear state
+			$points_container.removeClass("error");
+
+			// Check if opposition selected
+			if ($(this).parent().hasClass("settled") && !($(this).hasClass("on"))) {
+				var $other = $(this).parent().find(".on"),
+					other_points = parseInt($other.data("cost"));
+
+				$points_container.text(current_num_points + other_points);
+				current_num_points += other_points;
+
+				$other.toggleClass("on");
+				$(this).parent().toggleClass("settled")
+			}
+
+			if ($(this).hasClass("on")) {
+				$points_container.text(current_num_points + cost);
+			} else {
+				$points_container.text(current_num_points - cost);
+			}
+
+			$(this).toggleClass("on");
+			$(this).parent().toggleClass("settled");
+
+			if (parseInt($points_container.text()) < 0)
+				$points_container.addClass("error")
+		};
+
+		function submitMatches() {
+
+			var points_remaining = parseInt($("#points-remaining").text()),
+				matches = [],
+				$btn = $(this);
+
+			$btn.text("Working...").attr("disabled",true).addClass("disabled")
+
+			// Don't allow if negative points (THIS IS THE ONLY CHECK)
+			if (points_remaining < 0)
+				return $("#match-picker-modal").find(".error-container").text("You have negative picking points! Un-select some games.")
+
+			// Grab match bets
+			$(".total-match-container").each(function() {
+				var $selected = $(this).find(".on");
+				if ($selected.length > 0)
+					matches.push([$selected.data("mid"), $selected.data("tid"), $selected.data("cost")]);
+			});
+
+			// Post to DB
+			$.post("/api/set_match_bets", {matches: JSON.stringify(matches)}, function(res) {
+				if (res.success) {
+					$("#match-picker-modal").find(".modal-body").css("max-width", "300px").empty().append("<h3 class='align-center success'>Picks saved!</h3>");
+					
+					setTimeout(function() {
+						$("#match-picker-modal").modal('hide');
+						$("button[name='match-betting-button']").attr("disabled",true).addClass("disabled");
+					}, 3000)
+
+				} else {
+					$("#match-picker-modal").find(".error-container").empty().text(res.error)
+					$btn.text("Done").attr("disabled", false);
+				}
+
+			}, 'json');
+		};
 
 		function togglePicks(e) {
 			

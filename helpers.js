@@ -127,6 +127,30 @@ exports.teamShortNameForIds = function(teams, team_ids) {
 };
 
 
+// Input: array of teams
+exports.formatMatchesForView = function(teams,matches) {
+
+	function teamForId(id) {
+		return (_.find(teams, function(team) { return team.id == parseInt(id) }))
+	};
+
+	return matches.map(function(match) {
+		var team1 = teamForId(match['team1Id'])
+		var team2 = teamForId(match['team2Id'])
+
+		match['team1Name'] = team1.short_name
+		match['team2Name'] = team2.short_name;
+
+		match['team1LogoPath'] = logoPathForTeamName(team1.short_name);
+		match['team2LogoPath'] = logoPathForTeamName(team2.short_name);
+
+		match['team1Record'] = team1.wins + "-" + team1.losses
+		match['team2Record'] = team2.wins + "-" + team2.losses
+
+		return match;
+	});
+}
+
 // exports.formatOddsForView = function(teams,odds) {
 // 	return 'foo'
 // };
@@ -135,6 +159,7 @@ exports.teamShortNameForIds = function(teams, team_ids) {
 exports.getLogoPathForTeamName = function(short_name) {
 	return logoPathForTeamName(short_name);
 };
+
 
 /* Input: short name
 	Output: logo path, formatted according to dev/prod env */
