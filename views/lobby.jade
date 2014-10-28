@@ -6,7 +6,7 @@ block content
 	.col-md-10.col-md-offset-1
 		h1 The Lobby
 			- var disabled = (made_weekly_bets)
-			- var klass = (made_weekly_bets || !user) ? 'disabled' : ''
+			- var klass = (made_weekly_bets || !user || matches.length == 0) ? 'disabled' : ''
 			button.tooltipper(class="#{klass} flat-button pull-right" name="match-betting-button", data-toggle="tooltip", title="Play our new mini-game. Pick the winners of this week's matches with a limited point system. Best record wins. (Note: you must be logged in to play)", data-placement="bottom") New! Wager on Weekly Matches
 		
 		if user
