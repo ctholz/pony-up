@@ -202,9 +202,11 @@ block content
 			$btn.text("Working...").attr("disabled",true).addClass("disabled")
 
 			// Don't allow if negative points (THIS IS THE ONLY CHECK)
-			if (points_remaining < 0)
+			if (points_remaining < 0) {
+				$btn.text("Done").attr("disabled", false);
 				return $("#match-picker-modal").find(".error-container").text("You have negative picking points! Un-select some games.")
-
+			}
+			
 			// Grab match bets
 			$(".total-match-container").each(function() {
 				var $selected = $(this).find(".on");
