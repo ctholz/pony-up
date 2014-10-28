@@ -109,14 +109,14 @@ db.sequelize.sync().complete(function(err) {
     
         // 
         var WEEK_OVERRIDE = (process.argv.length > 2) ? parseInt(process.argv[2]) : CONSTANTS.WEEK_OF_SEASON;
-        main(WEEK_OVERRIDE)
-   		// // Only run on Tuesday
-     //    var d = new Date();
-     //    if (d.getDay() != 4) {
-     //    	console.log('CRON - window_closed - not Thursday, sleepy time.')
-     //    	process.exit()
-     //    } else
-   		// 	main(WEEK_OVERRIDE);
+        //main(WEEK_OVERRIDE)
+   		// Only run on Tuesday
+        var d = new Date();
+        if (d.getDay() != 4) {
+        	console.log('CRON - window_closed - not Thursday, sleepy time.')
+        	process.exit()
+        } else
+   			main(WEEK_OVERRIDE);
 
 
     });
