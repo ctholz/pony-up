@@ -5,7 +5,7 @@
 
 /* --  CONSTANTS   --*/
 global.CONSTANTS = {
-    WEEK_OF_SEASON:         10,
+    WEEK_OF_SEASON:         11,
     WEEKS_IN_SEASON:        17,
     MASTER_PASSWORD:        "tinaseelig",
     CRYPTO_KEY:             "innovation",
